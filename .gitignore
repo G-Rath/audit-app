@@ -1,0 +1,17 @@
+.idea/
+.vscode/
+.terraform/
+coverage/
+node_modules/
+lib/
+
+.eslintcache
+pids
+*.pid
+*.swp
+*.seed
+*.pid.lock
+*.tsbuildinfo
+.env
+.envrc
+.DS_STORE

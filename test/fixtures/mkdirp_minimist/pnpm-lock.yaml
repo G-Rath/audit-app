@@ -1,0 +1,20 @@
+dependencies:
+  minimist: 0.0.8
+  mkdirp: 0.5.0
+lockfileVersion: 5.1
+packages:
+  /minimist/0.0.8:
+    dev: false
+    resolution:
+      integrity: sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
+  /mkdirp/0.5.0:
+    dependencies:
+      minimist: 0.0.8
+    deprecated: Legacy versions of mkdirp are no longer supported. Please update to mkdirp 1.x. (Note that the API surface has changed to use Promises in 1.x.)
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha1-HXMHam35hs2TROFecfzAWkyavxI=
+specifiers:
+  minimist: 0.0.8
+  mkdirp: 0.5.0

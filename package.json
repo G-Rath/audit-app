@@ -1,0 +1,65 @@
+{
+  "name": "audit-app",
+  "version": "0.0.0",
+  "description": "A cli tool for auditing apps & packages using their respective package managers.",
+  "keywords": [
+    "ci",
+    "audit",
+    "audit-app",
+    "auditapp",
+    "audit-runner",
+    "auditrunner",
+    "auditer",
+    "app"
+  ],
+  "license": "ISC",
+  "author": "Gareth Jones",
+  "main": "lib/index.js",
+  "bin": "lib/cli.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "build": "rm -rf lib/* && tsc -p tsconfig.build.json",
+    "cli": "ts-node -T src/cli.ts",
+    "lint": "eslint . --ignore-pattern '!.eslintrc.js' --ext js,ts",
+    "prepack": "npm run build",
+    "test": "jest",
+    "typecheck": "ttsc -p . --noEmit",
+    "tools:generate-fixture-data": "tools/generate-fixture-data.ts"
+  },
+  "prettier": "prettier-config-ackama",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "@jest/types": "^26.2.0",
+    "@types/eslint": "^6.8.1",
+    "@types/jest": "^26.0.8",
+    "@types/node": "^14.0.27",
+    "@types/yargs": "^15.0.5",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
+    "eslint": "^6.8.0",
+    "eslint-config-ackama": "^1.7.1",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-jest": "^23.20.0",
+    "eslint-plugin-jest-formatting": "^1.2.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.2.2",
+    "memfs": "^3.2.0",
+    "prettier": "^2.0.5",
+    "prettier-config-ackama": "^0.1.2",
+    "ts-jest": "^26.1.4",
+    "ts-node": "^8.10.2",
+    "ttypescript": "^1.5.10",
+    "typescript": "^3.9.7",
+    "unionfs": "^4.4.0"
+  }
+}

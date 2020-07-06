@@ -4,11 +4,20 @@ export type SeverityCounts = Record<Severity, number>;
 
 export type Advisories = Record<number, Advisory>;
 
-export interface AuditResults {
+export interface Statistics {
+  dependencies?: number;
+  devDependencies?: number;
+  optionalDependencies?: number;
+  totalDependencies?: number;
+}
+
+export interface AuditOutput {
   actions: Action[];
   advisories: Advisories;
   muted: unknown[];
   metadata: AuditMetadata;
+  // npm only
+  runId?: string;
 }
 
 export interface Action {
@@ -68,12 +77,8 @@ export interface AdvisoryMetadata {
   affected_components: string;
 }
 
-export interface AuditMetadata {
+export interface AuditMetadata extends Required<Statistics> {
   vulnerabilities: SeverityCounts;
-  dependencies: number;
-  devDependencies: number;
-  optionalDependencies: number;
-  totalDependencies: number;
 }
 
 // export interface Advisory {

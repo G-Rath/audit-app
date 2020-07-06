@@ -1,109 +1,220 @@
-import {
-  SpawnSyncOptionsWithStringEncoding,
-  SpawnSyncReturns
-} from 'child_process';
-import { spawnSync } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
+import { PassThrough, Writable } from 'stream';
+import { mocked } from 'ts-jest/utils';
 import { audit } from '../../src/audit';
-import { AuditResults } from '../../src/types';
+import { AuditOutput } from '../../src/types';
 import fixtures from '../fixtures';
 
 jest.mock('child_process');
 
-const spawnSyncMock = (spawnSync as unknown) as jest.MockedFunction<
-  (
-    command: string,
-    args?: readonly string[],
-    options?: SpawnSyncOptionsWithStringEncoding
-  ) => SpawnSyncReturns<string>
->;
+const spawnMock = mocked(spawn);
 
-const mockSpawnStdout = (stdout: string): void => {
-  spawnSyncMock.mockReturnValue({
-    output: [],
-    pid: 0,
-    signal: null,
-    status: null,
-    stderr: '',
-    stdout
-  });
+const mockSpawnStdoutStream = (): Writable => {
+  const stdout = new PassThrough();
+
+  spawnMock.mockReturnValue(
+    new Proxy<ChildProcess>({} as ChildProcess, {
+      get(_, property): unknown {
+        if (property === 'stdout') {
+          return stdout;
+        }
+
+        throw new Error(`"${property.toString()} is stubbed`);
+      }
+    })
+  );
+
+  return stdout;
 };
+
+/*
+  todo - tests to write:
+
+    * test that errors are rejected (tryOrCall)
+      - mock spawn to get control of stdout
+        yarn:
+          - feed stdout a line that is invalid json
+          -> it should error and reject
+        npm:
+          - feed some lines of invalid json
+          - call 'close' on the stream to trigger JSON.parse
+          -> it should error and reject
+ */
 
 describe('audit', () => {
   describe('when auditing with npm', () => {
-    beforeEach(() => mockSpawnStdout(fixtures.mkdirp.npm));
-
     it('calls audit --json in the given directory', async () => {
-      await audit('my-dir', 'npm');
+      mockSpawnStdoutStream().end('{}');
 
-      expect(spawnSyncMock).toHaveBeenCalledWith(
+      const doAudit = audit('my-dir', 'npm');
+
+      await doAudit;
+
+      expect(spawnMock).toHaveBeenCalledWith(
         'npm',
         ['audit', '--json', '--prefix', '.'],
-        { encoding: 'utf-8', cwd: 'my-dir' }
-      );
-    });
-
-    it('returns the parsed audit results', async () => {
-      await expect(audit('my-dir', 'npm')).resolves.toStrictEqual(
-        JSON.parse(fixtures.mkdirp.npm)
-      );
-    });
-  });
-
-  describe('when auditing with pnpm', () => {
-    beforeEach(() => mockSpawnStdout(fixtures.mkdirp.pnpm));
-
-    it('calls audit --json in the given directory', async () => {
-      await audit('my-dir', 'pnpm');
-
-      expect(spawnSyncMock).toHaveBeenCalledWith(
-        'pnpm',
-        ['audit', '--json', '--prefix', '.'],
-        { encoding: 'utf-8', cwd: 'my-dir' }
-      );
-    });
-
-    it('returns the parsed audit results', async () => {
-      await expect(audit('my-dir', 'pnpm')).resolves.toStrictEqual(
-        JSON.parse(fixtures.mkdirp.pnpm)
-      );
-    });
-  });
-
-  describe('when auditing with yarn', () => {
-    it('calls audit --json in the given directory', async () => {
-      mockSpawnStdout(fixtures.mkdirp.yarn);
-
-      await audit('my-dir', 'yarn');
-
-      expect(spawnSyncMock).toHaveBeenCalledWith(
-        'yarn',
-        ['audit', '--json', '--cwd', '.'],
-        { encoding: 'utf-8', cwd: 'my-dir' }
+        { cwd: 'my-dir' }
       );
     });
 
     it('returns the parsed audit results', async () => {
       const fixture = fixtures.mkdirp;
+      const stdout = mockSpawnStdoutStream();
 
-      mockSpawnStdout(fixture.yarn);
-      const npmResults = JSON.parse(fixture.npm) as AuditResults;
+      const auditRun = audit('my-dir', 'npm');
 
-      const results = await audit('my-dir', 'yarn');
+      fixture.npm.split('\n').forEach(line => stdout.write(`${line}\n`));
+      stdout.end();
+
+      const results = await auditRun;
+
+      const auditOutput = JSON.parse(fixture.npm) as AuditOutput;
+
+      delete auditOutput.metadata.vulnerabilities;
+
+      expect(results.advisories).toStrictEqual(auditOutput.advisories);
+      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+    });
+
+    it('parses line-by-line', async () => {
+      const fixture = fixtures.mkdirp_minimist;
+      const stdout = mockSpawnStdoutStream();
+
+      const auditRun = audit('my-dir', 'npm');
+
+      fixture.npm.split('').forEach(char => stdout.write(char));
+      stdout.end();
+
+      const results = await auditRun;
+
+      const auditOutput = JSON.parse(fixture.npm) as AuditOutput;
+
+      delete auditOutput.metadata.vulnerabilities;
+
+      expect(results.advisories).toStrictEqual(auditOutput.advisories);
+      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+    });
+
+    describe('when the json is not parsable', () => {
+      it('rejects', async () => {
+        const fixture = fixtures.mkdirp_minimist;
+        const stdout = mockSpawnStdoutStream();
+
+        const auditRun = audit('my-dir', 'npm');
+
+        fixture.npm
+          .substr(5)
+          .split('')
+          .forEach(char => stdout.write(char));
+        stdout.end();
+
+        await expect(auditRun).rejects.toThrow(Error);
+      });
+    });
+  });
+
+  describe('when auditing with pnpm', () => {
+    it('calls audit --json in the given directory', async () => {
+      mockSpawnStdoutStream().end('{}');
+
+      await audit('my-dir', 'pnpm');
+
+      expect(spawnMock).toHaveBeenCalledWith(
+        'pnpm',
+        ['audit', '--json', '--prefix', '.'],
+        { cwd: 'my-dir' }
+      );
+    });
+
+    it('returns the parsed audit results', async () => {
+      const fixture = fixtures.mkdirp;
+      const stdout = mockSpawnStdoutStream();
+
+      const auditRun = audit('my-dir', 'pnpm');
+
+      fixture.pnpm.split('\n').forEach(line => stdout.write(`${line}\n`));
+      stdout.end();
+
+      const results = await auditRun;
+
+      const auditOutput = JSON.parse(fixture.pnpm) as AuditOutput;
+
+      delete auditOutput.metadata.vulnerabilities;
+
+      expect(results.advisories).toStrictEqual(auditOutput.advisories);
+      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+    });
+
+    it('parses line-by-line', async () => {
+      const fixture = fixtures.mkdirp_minimist;
+      const stdout = mockSpawnStdoutStream();
+
+      const auditRun = audit('my-dir', 'npm');
+
+      fixture.pnpm.split('').forEach(char => stdout.write(char));
+      stdout.end();
+
+      const results = await auditRun;
+
+      const auditOutput = JSON.parse(fixture.pnpm) as AuditOutput;
+
+      delete auditOutput.metadata.vulnerabilities;
+
+      expect(results.advisories).toStrictEqual(auditOutput.advisories);
+      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+    });
+
+    describe('when the json is not parsable', () => {
+      it('rejects', async () => {
+        const fixture = fixtures.mkdirp_minimist;
+        const stdout = mockSpawnStdoutStream();
+
+        const auditRun = audit('my-dir', 'pnpm');
+
+        fixture.pnpm
+          .substr(5)
+          .split('')
+          .forEach(char => stdout.write(char));
+        stdout.end();
+
+        await expect(auditRun).rejects.toThrow(Error);
+      });
+    });
+  });
+
+  describe('when auditing with yarn', () => {
+    it('calls audit --json in the given directory', async () => {
+      mockSpawnStdoutStream().end('{}');
+
+      await audit('my-dir', 'yarn');
+
+      expect(spawnMock).toHaveBeenCalledWith(
+        'yarn',
+        ['audit', '--json', '--cwd', '.'],
+        { cwd: 'my-dir' }
+      );
+    });
+
+    it('returns the parsed audit results', async () => {
+      const fixture = fixtures.mkdirp;
+      const stdout = mockSpawnStdoutStream();
+
+      const auditRun = audit('my-dir', 'yarn');
+
+      fixture.yarn.split('\n').forEach(line => stdout.write(`${line}\n`));
+      stdout.end();
+
+      const results = await auditRun;
+
+      const npmResults = JSON.parse(fixture.npm) as AuditOutput;
 
       expect(results.advisories).toStrictEqual(npmResults.advisories);
-      expect(results.metadata).toMatchInlineSnapshot(`
+      expect(results.statistics).toMatchInlineSnapshot(`
         Object {
           "dependencies": 2,
           "devDependencies": 0,
           "optionalDependencies": 0,
           "totalDependencies": 2,
-          "vulnerabilities": Object {
-            "critical": 0,
-            "high": 0,
-            "info": 0,
-            "low": 1,
-            "moderate": 0,
-          },
         }
       `);
     });
@@ -111,40 +222,63 @@ describe('audit', () => {
     describe('when there are multiple results for the same advisory', () => {
       it('merges them', async () => {
         const fixture = fixtures.mkdirp_minimist;
+        const stdout = mockSpawnStdoutStream();
 
-        mockSpawnStdout(fixture.yarn);
-        const npmResults = JSON.parse(fixture.npm) as AuditResults;
+        const auditRun = audit('my-dir', 'yarn');
 
-        const results = await audit('my-dir', 'yarn');
+        fixture.yarn.split('\n').forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        const npmResults = JSON.parse(fixture.npm) as AuditOutput;
 
         expect(results.advisories).toStrictEqual(npmResults.advisories);
-        expect(results.metadata).toMatchInlineSnapshot(`
+        expect(results.statistics).toMatchInlineSnapshot(`
           Object {
             "dependencies": 3,
             "devDependencies": 0,
             "optionalDependencies": 0,
             "totalDependencies": 3,
-            "vulnerabilities": Object {
-              "critical": 0,
-              "high": 0,
-              "info": 0,
-              "low": 2,
-              "moderate": 0,
-            },
           }
         `);
       });
     });
 
     describe('when the output is missing "auditSummary"', () => {
-      it('throws', async () => {
-        mockSpawnStdout(
-          fixtures.mkdirp.yarn.trim().split('\n').slice(0, -1).join('\n')
-        );
+      it('is fine', async () => {
+        const fixture = fixtures.mkdirp_minimist;
+        const stdout = mockSpawnStdoutStream();
 
-        await expect(async () => audit('my-dir', 'yarn')).rejects.toThrow(
-          'Could not find "auditSummary" in `yarn audit` output'
-        );
+        const auditRun = audit('my-dir', 'yarn');
+
+        fixture.yarn
+          .trim()
+          .split('\n')
+          .slice(0, -1)
+          .forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        expect(results.statistics).toMatchInlineSnapshot(`Object {}`);
+      });
+    });
+
+    describe('when the json is not parsable', () => {
+      it('rejects', async () => {
+        const fixture = fixtures.mkdirp_minimist;
+        const stdout = mockSpawnStdoutStream();
+
+        const auditRun = audit('my-dir', 'yarn');
+
+        fixture.yarn
+          .substr(5)
+          .split('')
+          .forEach(char => stdout.write(char));
+        stdout.end();
+
+        await expect(auditRun).rejects.toThrow(Error);
       });
     });
   });

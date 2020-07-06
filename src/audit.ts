@@ -1,5 +1,14 @@
-import { spawnSync } from 'child_process';
-import { Advisory, AuditMetadata, AuditResults, Resolution } from './types';
+import { spawn } from 'child_process';
+import ReadlineTransform from 'readline-transform';
+import {
+  Advisories,
+  Advisory,
+  AuditMetadata,
+  AuditOutput,
+  Resolution,
+  Statistics
+} from './types';
+import ReadableStream = NodeJS.ReadableStream;
 
 export const SupportedPackageManagers = ['npm', 'pnpm', 'yarn'] as const;
 
@@ -24,65 +33,90 @@ interface AuditSummaryLine {
 
 type ParsedJsonLine = AuditAdvisoryLine | AuditSummaryLine;
 
-/**
- *
- * @param {ParsedJsonLine[]} lines
- *
- * @return {asserts lines is AuditAdvisoryLine[]}
- */
-function assertContainsOnlyAuditAdvisoryLines(
-  lines: ParsedJsonLine[]
-): asserts lines is AuditAdvisoryLine[] {
-  const otherLines = lines.filter(line => line.type !== 'auditAdvisory');
+const pickStatistics = (metadata: AuditMetadata): Statistics => {
+  const statistics = { ...metadata };
 
-  if (otherLines.length) {
-    throw new Error(
-      `Expected lines to all be "auditAdvisory" type, but found type "${otherLines
-        .map(line => line.type)
-        .join('", & "')}" too`
-    );
-  }
-}
+  delete statistics.vulnerabilities;
 
-export const parseYarnAuditLines = (
-  str: string
-): [AuditSummaryLine, ...AuditAdvisoryLine[]] => {
-  const parsedLines = str
-    .trim()
-    .split('\n')
-    .map(line => JSON.parse(line) as ParsedJsonLine);
-  const summary = parsedLines.pop();
-
-  if (summary?.type !== 'auditSummary') {
-    throw new Error('Could not find "auditSummary" in `yarn audit` output');
-  }
-
-  assertContainsOnlyAuditAdvisoryLines(parsedLines);
-
-  return [summary, ...parsedLines];
+  return statistics;
 };
 
-const parseYarnAuditOutput = (output: string): AuditResults => {
-  const [{ data: metadata }, ...advisingLines] = parseYarnAuditLines(output);
-  const advisories: AuditResults['advisories'] = {};
+const tryOrCall = <TParams extends unknown[]>(
+  fn: (...args: TParams) => void,
+  er: (error: Error) => void
+) => (...args: TParams): void => {
+  try {
+    fn(...args);
+  } catch (error) {
+    er(error);
+  }
+};
 
-  advisingLines.forEach(
-    advisory => (advisories[advisory.data.advisory.id] = advisory.data.advisory)
-  );
+export interface AuditResults {
+  advisories: Advisories;
+  statistics: Statistics;
+}
 
-  return {
-    actions: [],
-    advisories,
-    muted: [],
-    metadata
-  };
+type AuditResultsCollector = (stdout: ReadableStream) => Promise<AuditResults>;
+
+const collectYarnAuditResults: AuditResultsCollector = async stdout => {
+  const results: AuditResults = { advisories: {}, statistics: {} };
+
+  return new Promise<AuditResults>((resolve, reject) => {
+    stdout.on('error', reject);
+
+    stdout.on(
+      'data',
+      tryOrCall<[string]>(line => {
+        const parsedLine = JSON.parse(line) as ParsedJsonLine;
+
+        if (parsedLine.type === 'auditSummary') {
+          results.statistics = pickStatistics(parsedLine.data);
+        }
+
+        if (parsedLine.type === 'auditAdvisory') {
+          results.advisories[parsedLine.data.advisory.id] =
+            parsedLine.data.advisory;
+        }
+      }, reject)
+    );
+
+    stdout.on('close', () => resolve(results));
+  });
+};
+
+const collectNpmAuditResults: AuditResultsCollector = async stdout => {
+  let json = '';
+
+  return new Promise<AuditResults>((resolve, reject) => {
+    stdout.on('error', reject);
+
+    stdout.on(
+      'data',
+      tryOrCall<[string]>(line => (json += line), reject)
+    );
+
+    stdout.on(
+      'close',
+      tryOrCall(() => {
+        const { advisories, metadata } = JSON.parse(json) as AuditOutput;
+
+        resolve({ advisories, statistics: pickStatistics(metadata) });
+      }, reject)
+    );
+  });
 };
 
 export const audit = async (
   dir: string,
   packageManager: SupportedPackageManager
 ): Promise<AuditResults> => {
-  const { stdout } = spawnSync(
+  const resultsCollector: AuditResultsCollector =
+    packageManager === 'yarn'
+      ? collectYarnAuditResults
+      : collectNpmAuditResults;
+
+  const { stdout } = spawn(
     packageManager,
     [
       'audit',
@@ -90,12 +124,10 @@ export const audit = async (
       `--${packageManager === 'yarn' ? 'cwd' : 'prefix'}`,
       '.'
     ],
-    { encoding: 'utf-8', cwd: dir }
+    { cwd: dir }
   );
 
-  if (packageManager === 'yarn') {
-    return parseYarnAuditOutput(stdout);
-  }
-
-  return Promise.resolve(JSON.parse(stdout) as AuditResults);
+  return resultsCollector(
+    stdout.pipe(new ReadlineTransform({ skipEmpty: true }))
+  );
 };

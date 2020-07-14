@@ -48,6 +48,7 @@ const parseConfigFile = (filepath: string): Record<string, unknown> => {
 
 export interface Config {
   packageManager: PackageManagerOption;
+  debug: boolean;
   preferNpmOverYarn: boolean;
   directory: string;
 }
@@ -67,6 +68,7 @@ const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
         default: DefaultConfigFile,
         configParser: parseConfigFile
       },
+      debug: { boolean: true, default: false },
       directory: {
         string: true,
         default: process.cwd(),
@@ -98,7 +100,8 @@ const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
   return {
     packageManager,
     allowlist: [],
-    directory: argv.directory
+    directory: argv.directory,
+    debug: argv.debug
   };
 };
 

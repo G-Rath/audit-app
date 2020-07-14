@@ -36,6 +36,7 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "readline-transform": "^1.0.0",
+    "strip-ansi": "^6.0.0",
     "yargs": "^15.4.1"
   },
   "devDependencies": {

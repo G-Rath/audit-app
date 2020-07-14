@@ -2,7 +2,7 @@ export type Severity = 'info' | 'low' | 'moderate' | 'high' | 'critical';
 
 export type SeverityCounts = Record<Severity, number>;
 
-export type Advisories = Record<number, Advisory>;
+export type Advisories = Record<string, Advisory>;
 
 export interface Statistics {
   dependencies?: number;

@@ -1,9 +1,10 @@
 /* eslint-disable no-sync */
 
 import * as fs from 'fs';
-import { Config, parseArgs } from '../../src/parseArgs';
+import { Options as ParsedArgs } from '../../src';
+import { parseArgs } from '../../src/parseArgs';
 
-const writeConfigFile = (name: string, config: Partial<Config>): void => {
+const writeConfigFile = (name: string, config: Partial<ParsedArgs>): void => {
   fs.writeFileSync(name, JSON.stringify(config, null, 2));
 };
 
@@ -12,7 +13,7 @@ let consoleErrorSpy: jest.SpiedFunction<typeof console.error>;
 
 describe('parseArgs', () => {
   beforeEach(() => {
-    consoleErrorSpy = jest.spyOn(console, 'error');
+    consoleErrorSpy = jest.spyOn(console, 'error').mockReturnValue();
     processExitSpy = jest.spyOn(process, 'exit').mockImplementation(code => {
       throw new Error(`yargs exited, code ${code ?? 'none'}`);
     });

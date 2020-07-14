@@ -4,9 +4,9 @@ import { generateReport } from './generateReport';
 
 export interface Options {
   packageManager: SupportedPackageManager;
-  allowlist: string[];
   directory: string;
   debug: boolean;
+  ignore: string[];
 }
 
 export const auditApp = async (options: Options): Promise<void> => {

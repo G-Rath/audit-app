@@ -2,7 +2,7 @@ import fs from 'fs';
 import * as path from 'path';
 import yargs from 'yargs/yargs';
 import { SupportedPackageManager, SupportedPackageManagers } from './audit';
-import { Options } from './index';
+import { Options as ParsedArgs } from './index';
 
 type PackageManagerOption = 'auto' | SupportedPackageManager;
 
@@ -46,21 +46,17 @@ const parseConfigFile = (filepath: string): Record<string, unknown> => {
   }
 };
 
-export interface Config {
-  packageManager: PackageManagerOption;
-  debug: boolean;
-  preferNpmOverYarn: boolean;
-  directory: string;
-}
-
-interface ArgvConfig {
-  argv: Config & { config?: string | false };
+interface ParsedArgvWithConfig {
+  argv: Omit<ParsedArgs, 'packageManager'> & {
+    packageManager: PackageManagerOption;
+    config?: string | false;
+  };
 }
 
 const DefaultConfigFile = '.auditapprc.json';
 
-const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
-  const { argv }: ArgvConfig = yargs(args)
+const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
+  const { argv }: ParsedArgvWithConfig = yargs(args)
     .options({
       config: {
         string: true,
@@ -78,7 +74,7 @@ const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
         default: 'auto' as PackageManagerOption,
         choices: ['auto'].concat(SupportedPackageManagers)
       },
-      preferNpmOverYarn: { boolean: true, default: false }
+      ignore: { array: true, default: [] }
     })
     .strict();
 
@@ -89,7 +85,7 @@ const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
     // eslint-disable-next-line no-sync
     (argv.config !== DefaultConfigFile || fs.existsSync(DefaultConfigFile))
   ) {
-    return parseArgsWithConfig(args, argv.config);
+    return parseWithConfig(args, argv.config);
   }
 
   const packageManager =
@@ -97,12 +93,7 @@ const parseArgsWithConfig = (args: string[], configPath?: string): Options => {
       ? determinePackageManager()
       : argv.packageManager;
 
-  return {
-    packageManager,
-    allowlist: [],
-    directory: argv.directory,
-    debug: argv.debug
-  };
+  return { ...argv, packageManager };
 };
 
-export const parseArgs = (args: string[]): Options => parseArgsWithConfig(args);
+export const parseArgs = (args: string[]): ParsedArgs => parseWithConfig(args);

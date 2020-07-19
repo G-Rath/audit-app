@@ -159,6 +159,8 @@ const severityColors: Record<Severity, chalk.ChalkFunction> = {
   critical: chalk.magenta
 };
 
+const Severities = Object.keys(severityColors) as Severity[];
+
 const buildAdvisoryTable = (advisory: Advisory, _report: AuditReport): string =>
   buildTable([
     [
@@ -174,6 +176,13 @@ const getHighestSeverity = (severities: SeverityCounts): Severity =>
   (Object.keys(severities).reverse() as Array<keyof SeverityCounts>).find(
     severity => severities[severity] > 0
   ) ?? 'info';
+
+const sortAdvisories = (advisories: Advisory[]): Advisory[] =>
+  advisories.sort(
+    (a, b) =>
+      a.module_name.localeCompare(b.module_name) ||
+      Severities.indexOf(b.severity) - Severities.indexOf(a.severity)
+  );
 
 export const formatReport = (report: AuditReport): string => {
   const severities = countSeverities(report);
@@ -194,7 +203,7 @@ export const formatReport = (report: AuditReport): string => {
  */
 
   const lines: string[] = [
-    ...Object.values(advisories).flatMap(advisory => [
+    ...sortAdvisories(Object.values(advisories)).flatMap(advisory => [
       buildAdvisoryTable(advisory, report),
       '\n'
     ])

@@ -55,6 +55,13 @@ const formatReportAndGetTables = (report: Partial<AuditReport>): string =>
 const formatReportAndGetSummary = (report: Partial<AuditReport>): string =>
   formatReport(report).split('\n').slice(-2).join('\n').trim();
 
+const prettifyTables = (tables: Array<string | string[]> | string): string =>
+  `\n${
+    Array.isArray(tables)
+      ? tables.map(ln => (Array.isArray(ln) ? ln.join('\n') : ln)).join('\n')
+      : tables
+  }\n`;
+
 describe('formatReport', () => {
   describe('when there are advisories', () => {
     describe('the tables', () => {
@@ -71,7 +78,7 @@ describe('formatReport', () => {
           vulnerable: ['one']
         });
 
-        expect(`\n${tables}\n`).toMatchInlineSnapshot(`
+        expect(prettifyTables(tables)).toMatchInlineSnapshot(`
           "
           ┌────────────┬────────────────────────────────────────────────────────────────────┐
           │ high       │ My Second Advisory (#1234)                                         │
@@ -109,6 +116,73 @@ describe('formatReport', () => {
           expect(tables.match(/My First Advisory/gu)).toHaveLength(1);
           expect(tables.match(/My Second Advisory/gu)).toHaveLength(1);
         });
+      });
+
+      it('sorts advisories by their module_name first', () => {
+        const tables = formatReportAndGetTables({
+          advisories: {
+            '1': buildAdvisory({ module_name: 'B', id: 1 }),
+            '2': buildAdvisory({ module_name: 'C', id: 2 }),
+            '3': buildAdvisory({ module_name: 'A', id: 3 })
+          }
+        });
+
+        expect(
+          prettifyTables([
+            '┌────────────┬────────────────────────────────────────────────────────────────────┐',
+            tables.split('\n').filter(line => line.includes(' Package  ')),
+            '└────────────┴────────────────────────────────────────────────────────────────────┘'
+          ])
+        ).toMatchInlineSnapshot(`
+          "
+          ┌────────────┬────────────────────────────────────────────────────────────────────┐
+          │ Package    │ A                                                                  │
+          │ Package    │ B                                                                  │
+          │ Package    │ C                                                                  │
+          └────────────┴────────────────────────────────────────────────────────────────────┘
+          "
+        `);
+      });
+
+      it('sorts advisories by their severity second', () => {
+        const tables = formatReportAndGetTables({
+          advisories: {
+            '1': buildAdvisory({
+              title: 'My Advisory',
+              id: 1,
+              severity: 'high',
+              module_name: 'A'
+            }),
+            '2': buildAdvisory({
+              title: 'My Advisory',
+              id: 2,
+              severity: 'critical',
+              module_name: 'A'
+            }),
+            '3': buildAdvisory({
+              title: 'My Advisory',
+              id: 3,
+              severity: 'low',
+              module_name: 'A'
+            })
+          }
+        });
+
+        expect(
+          prettifyTables([
+            '┌────────────┬────────────────────────────────────────────────────────────────────┐',
+            tables.split('\n').filter(line => line.includes(' My Advisory (')),
+            '└────────────┴────────────────────────────────────────────────────────────────────┘'
+          ])
+        ).toMatchInlineSnapshot(`
+          "
+          ┌────────────┬────────────────────────────────────────────────────────────────────┐
+          │ critical   │ My Advisory (#2)                                                   │
+          │ high       │ My Advisory (#1)                                                   │
+          │ low        │ My Advisory (#3)                                                   │
+          └────────────┴────────────────────────────────────────────────────────────────────┘
+          "
+        `);
       });
     });
 

@@ -93,6 +93,37 @@ describe('formatReport', () => {
         `);
       });
 
+      it('wraps the value columns to a fixed width', () => {
+        const tables = formatReportAndGetTables({
+          advisories: {
+            '1234': buildAdvisory({
+              findings: [{ version: '10.1.0', paths: ['one'] }],
+              title: `The advisory with a very l${'o'.repeat(50)}ng name`,
+              patched_versions: `>=1.0.${'0'.repeat(50)} < 1.5.0`,
+              id: 1234,
+              severity: 'high'
+            })
+          },
+          vulnerable: ['one']
+        });
+
+        expect(prettifyTables(tables)).toMatchInlineSnapshot(`
+          "
+          ┌────────────┬────────────────────────────────────────────────────────────────────┐
+          │ high       │ The advisory with a very                                           │
+          │            │ loooooooooooooooooooooooooooooooooooooooooooooooooong name         │
+          │            │ (#1234)                                                            │
+          ├────────────┼────────────────────────────────────────────────────────────────────┤
+          │ Package    │ yargs-parser                                                       │
+          ├────────────┼────────────────────────────────────────────────────────────────────┤
+          │ Patched in │ >=1.0.00000000000000000000000000000000000000000000000000 < 1.5.0   │
+          ├────────────┼────────────────────────────────────────────────────────────────────┤
+          │ More info  │ https://npmjs.com/advisories/1500                                  │
+          └────────────┴────────────────────────────────────────────────────────────────────┘
+          "
+        `);
+      });
+
       describe('when an advisory has multiple findings', () => {
         it('prints one table per advisory', () => {
           const tables = formatReportAndGetTables({

@@ -5,7 +5,20 @@ import { Advisory, Severity, SeverityCounts } from './types';
 
 type FalsyValue = null | undefined | 0 | false | '';
 
-const pad = (str: string): string => ` ${str} `;
+const pad = (str: string): string => ` ${str.trim()} `;
+
+export const wrap = (str: string, width: number): string => {
+  const regexp = new RegExp(
+    `.{1,${width}}(?:[\\s\u200B]+|$)|[^\\s\u200B]+?(?:[\\s\u200B]+|$)`,
+    'gu'
+  );
+  // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
+  const result: string[] = str.match(regexp) ?? [];
+
+  return result
+    .map(l => (l.endsWith('\n') ? l.slice(0, l.length - 1) : l))
+    .join('\n');
+};
 
 const f = <T>(...vs: Array<T | FalsyValue>): T[] =>
   vs.filter((v): v is T => !!v);
@@ -110,6 +123,19 @@ const warpInTopAndBottomBorders = (
 
 const countStr = (str: string): number => stripAnsi(str).length;
 
+const createRow = (
+  [labelWidth, label]: [number, string],
+  [valueWidth, value]: [number, string]
+): string[] => [
+  chalk.grey(BoxChar.LightVertical),
+  label,
+  ' '.repeat(labelWidth - countStr(label)),
+  chalk.grey(BoxChar.LightVertical),
+  value,
+  ' '.repeat(valueWidth - countStr(value)),
+  chalk.grey(BoxChar.LightVertical)
+];
+
 const buildTable = (
   contents: ReadonlyArray<[string, string]>,
   size = 80
@@ -132,20 +158,16 @@ const buildTable = (
     maxLabelWidth,
     maxValueWidth,
     contents.flatMap(([label, value], index) => {
-      const paddedLabel = pad(label);
-      const paddedValue = pad(value);
+      const lines = wrap(pad(value), maxValueWidth).split('\n');
 
       return f(
         index && rowSpacer,
-        [
-          chalk.grey(BoxChar.LightVertical),
-          paddedLabel,
-          ' '.repeat(maxLabelWidth - countStr(paddedLabel)),
-          chalk.grey(BoxChar.LightVertical),
-          paddedValue,
-          ' '.repeat(maxValueWidth - countStr(paddedValue)),
-          chalk.grey(BoxChar.LightVertical)
-        ].join('')
+        ...lines.map((v, i) =>
+          createRow(
+            [maxLabelWidth, i === 0 ? pad(label) : ''],
+            [maxValueWidth, pad(v)]
+          ).join('')
+        )
       );
     })
   );

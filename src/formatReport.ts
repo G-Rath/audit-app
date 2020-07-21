@@ -189,7 +189,12 @@ const buildAdvisoryTable = (advisory: Advisory, _report: AuditReport): string =>
       severityColors[advisory.severity](advisory.severity),
       chalk.whiteBright(`${advisory.title} (#${advisory.id})`)
     ],
-    ['Package', advisory.module_name],
+    [
+      'Package',
+      `${advisory.module_name} ${Array.from(
+        new Set(advisory.findings.map(finding => `v${finding.version}`))
+      ).join(', ')}`
+    ],
     ['Patched in', advisory.patched_versions],
     ['More info', advisory.url]
   ]).join('\n');

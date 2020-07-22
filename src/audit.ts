@@ -33,6 +33,16 @@ interface AuditSummaryLine {
 
 type ParsedJsonLine = AuditAdvisoryLine | AuditSummaryLine;
 
+interface NpmError {
+  error: {
+    code: string;
+    summary: string;
+    detail: string;
+  };
+}
+
+type ParsedNpmOutput = AuditOutput | NpmError;
+
 const pickStatistics = (metadata: AuditMetadata): Statistics => {
   const statistics = { ...metadata };
 
@@ -99,9 +109,26 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
     stdout.on(
       'close',
       tryOrCall(() => {
-        const { advisories, metadata } = JSON.parse(json) as AuditOutput;
+        if (json.trim().startsWith('ERROR')) {
+          console.log(json);
 
-        resolve({ advisories, statistics: pickStatistics(metadata) });
+          throw new Error(json);
+        }
+
+        const auditOutput = JSON.parse(json) as ParsedNpmOutput;
+
+        if ('error' in auditOutput) {
+          const errorMessage = `${auditOutput.error.code}: ${auditOutput.error.summary}`;
+
+          console.log(errorMessage);
+
+          throw new Error(errorMessage);
+        }
+
+        resolve({
+          advisories: auditOutput.advisories,
+          statistics: pickStatistics(auditOutput.metadata)
+        });
       }, reject)
     );
   });

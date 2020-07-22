@@ -111,6 +111,29 @@ describe('audit', () => {
         await expect(auditRun).rejects.toThrow(Error);
       });
     });
+
+    describe('when an error occurs', () => {
+      it('rejects with the error as the message', async () => {
+        const stdout = mockSpawnStdoutStream();
+
+        const auditRun = audit('my-dir', 'npm');
+
+        stdout.end(
+          JSON.stringify({
+            error: {
+              code: 'EAUDITNOLOCK',
+              summary:
+                'Neither npm-shrinkwrap.json nor package-lock.json found: Cannot audit a project without a lockfile',
+              detail: 'Try creating one first with: npm i --package-lock-only'
+            }
+          })
+        );
+
+        await expect(auditRun).rejects.toThrow(
+          'EAUDITNOLOCK: Neither npm-shrinkwrap.json nor package-lock.json found'
+        );
+      });
+    });
   });
 
   describe('when auditing with pnpm', () => {
@@ -178,6 +201,22 @@ describe('audit', () => {
         stdout.end();
 
         await expect(auditRun).rejects.toThrow(Error);
+      });
+    });
+
+    describe('when an error occurs', () => {
+      it('rejects with the error as the message', async () => {
+        const stdout = mockSpawnStdoutStream();
+
+        const auditRun = audit('my-dir', 'npm');
+
+        stdout.end(
+          ' ERROR  No pnpm-lock.yaml found: Cannot audit a project without a lockfile'
+        );
+
+        await expect(auditRun).rejects.toThrow(
+          ' ERROR  No pnpm-lock.yaml found'
+        );
       });
     });
   });

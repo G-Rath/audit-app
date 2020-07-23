@@ -10,7 +10,7 @@ export interface Options {
 }
 
 export const auditApp = async (options: Options): Promise<void> => {
-  console.log('auditing...');
+  console.log(`auditing with ${options.packageManager}...`);
 
   try {
     const results = await audit(options.directory, options.packageManager);
@@ -18,10 +18,12 @@ export const auditApp = async (options: Options): Promise<void> => {
 
     console.log(formatReport(report));
   } catch (error) {
+    process.exitCode = 1;
+
     if (options.debug) {
       throw error;
     }
 
-    console.log('an error happened while auditing');
+    console.error('an error happened while auditing');
   }
 };

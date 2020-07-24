@@ -6,9 +6,9 @@ import { Options as ParsedArgs } from './index';
 
 type PackageManagerOption = 'auto' | SupportedPackageManager;
 
-const determinePackageManager = (): SupportedPackageManager => {
+const determinePackageManager = (dir: string): SupportedPackageManager => {
   // eslint-disable-next-line no-sync
-  const files = fs.readdirSync('.');
+  const files = fs.readdirSync(dir);
 
   if (files.includes('package-lock.json')) {
     return 'npm';
@@ -90,7 +90,7 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
 
   const packageManager =
     argv.packageManager === 'auto'
-      ? determinePackageManager()
+      ? determinePackageManager(argv.directory)
       : argv.packageManager;
 
   return { ...argv, packageManager };

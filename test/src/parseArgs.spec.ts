@@ -1,11 +1,30 @@
 /* eslint-disable no-sync */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { Options as ParsedArgs } from '../../src';
+import { SupportedPackageManager } from '../../src/audit';
 import { parseArgs } from '../../src/parseArgs';
 
 const writeConfigFile = (name: string, config: Partial<ParsedArgs>): void => {
   fs.writeFileSync(name, JSON.stringify(config, null, 2));
+};
+
+const lockFiles: Record<SupportedPackageManager, string> = {
+  yarn: 'yarn.lock',
+  pnpm: 'pnpm-lock.yaml',
+  npm: 'package-lock.json'
+};
+
+const writeLockFile = (
+  packageManager: SupportedPackageManager,
+  dir: string
+): void => {
+  fs.mkdirSync(dir, { recursive: true });
+
+  const lockFile = lockFiles[packageManager];
+
+  fs.writeFileSync(path.join(dir, lockFile), '');
 };
 
 let processExitSpy: jest.SpiedFunction<typeof process.exit>;
@@ -71,6 +90,24 @@ describe('parseArgs', () => {
 
           expect(parseArgs([])).toHaveProperty('packageManager', 'yarn');
         });
+
+        describe('when combined with the --directory flag', () => {
+          it('checks the given dir for a lock file', () => {
+            const dir = 'path/to/app';
+
+            writeLockFile('yarn', '.');
+            writeLockFile('pnpm', dir);
+
+            expect(parseArgs(['--directory', '.'])).toHaveProperty(
+              'packageManager',
+              'yarn'
+            );
+            expect(parseArgs(['--directory', dir])).toHaveProperty(
+              'packageManager',
+              'pnpm'
+            );
+          });
+        });
       });
     });
 
@@ -123,6 +160,19 @@ describe('parseArgs', () => {
             expect.stringContaining('ENOENT: no such file or directory')
           );
         });
+      });
+    });
+
+    describe('--directory <directory-path>', () => {
+      it('uses the given value for the directory', () => {
+        const dir = 'path/to/app';
+
+        writeLockFile('pnpm', dir);
+
+        expect(parseArgs(['--directory', dir])).toHaveProperty(
+          'directory',
+          dir
+        );
       });
     });
   });

@@ -175,5 +175,16 @@ describe('parseArgs', () => {
         );
       });
     });
+
+    describe('--output <output-format>', () => {
+      it('passes the value on as the "output" property', () => {
+        writeLockFile('npm', process.cwd());
+
+        expect(parseArgs(['--output', 'paths'])).toHaveProperty(
+          'output',
+          'paths'
+        );
+      });
+    });
   });
 });

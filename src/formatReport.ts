@@ -3,6 +3,17 @@ import stripAnsi from 'strip-ansi';
 import { AuditReport } from './generateReport';
 import { Advisory, Severity, SeverityCounts } from './types';
 
+export const SupportedReportFormats = [
+  'summary',
+  'tables',
+  'paths',
+  'json'
+] as const;
+
+export type SupportedReportFormat = typeof SupportedReportFormats[number];
+
+type ReportFormatter = (report: AuditReport) => string;
+
 type FalsyValue = null | undefined | 0 | false | '';
 
 const pad = (str: string): string => ` ${str.trim()} `;
@@ -183,7 +194,7 @@ const severityColors: Record<Severity, chalk.ChalkFunction> = {
 
 const Severities = Object.keys(severityColors) as Severity[];
 
-const buildAdvisoryTable = (advisory: Advisory, _report: AuditReport): string =>
+const buildAdvisoryTable = (advisory: Advisory): string =>
   buildTable([
     [
       severityColors[advisory.severity](advisory.severity),
@@ -204,55 +215,53 @@ const getHighestSeverity = (severities: SeverityCounts): Severity =>
     severity => severities[severity] > 0
   ) ?? 'info';
 
-const sortAdvisories = (advisories: Advisory[]): Advisory[] =>
-  advisories.sort(
-    (a, b) =>
-      a.module_name.localeCompare(b.module_name) ||
-      Severities.indexOf(b.severity) - Severities.indexOf(a.severity)
-  );
+const compareAdvisories = (a: Advisory, b: Advisory): number =>
+  a.module_name.localeCompare(b.module_name) ||
+  Severities.indexOf(b.severity) - Severities.indexOf(a.severity);
 
-export const formatReport = (report: AuditReport): string => {
+const buildReportTables = (report: AuditReport): string[] =>
+  Object.values(report.advisories)
+    .sort(compareAdvisories)
+    .flatMap(advisory => [buildAdvisoryTable(advisory), '\n']);
+
+const buildReportSummary = (report: AuditReport): string[] => {
   const severities = countSeverities(report);
   const {
-    advisories, //
     vulnerable: { length: vulnerabilities },
     statistics
   } = report;
-  /*
-    - how many packages were audited?
-      - ("x dev")
-    - how long did it take to audit them?
-    - how many advisories?
-      - "+x that were ignored"
-      - "x <severity> (+y ignored)"
 
-   - "found x vulnerabilities affecting y packages"
- */
-
-  const lines: string[] = [
-    ...sortAdvisories(Object.values(advisories)).flatMap(advisory => [
-      buildAdvisoryTable(advisory, report),
-      '\n'
-    ])
-  ].concat(
-    f(
-      [
-        '', // leading space
-        `found ${severityColors[getHighestSeverity(severities)](
-          vulnerabilities
-        )} vulnerabilities`,
-        `(including ${report.ignored.length} ignored)`,
-        `across ${statistics.totalDependencies ?? '"some"'} packages`
-      ],
-      vulnerabilities && [
-        '\t  \\:',
-        (Object.entries(severities) as Array<[Severity, number]>)
-          .filter(([, count]) => count > 0)
-          .map(([severity, c]) => `${c} ${severityColors[severity](severity)}`)
-          .join(', ')
-      ]
-    ).map(arr => arr.join(' '))
-  );
-
-  return lines.join('\n');
+  return f(
+    [
+      '', // leading space
+      `found ${severityColors[getHighestSeverity(severities)](
+        vulnerabilities
+      )} vulnerabilities`,
+      `(including ${report.ignored.length} ignored)`,
+      `across ${statistics.totalDependencies ?? '"some"'} packages`
+    ],
+    vulnerabilities && [
+      '\t  \\:',
+      (Object.entries(severities) as Array<[Severity, number]>)
+        .filter(([, count]) => count > 0)
+        .map(([severity, c]) => `${c} ${severityColors[severity](severity)}`)
+        .join(', ')
+    ]
+  ).map(arr => arr.join(' '));
 };
+
+const formatters: Record<SupportedReportFormat, ReportFormatter> = {
+  json: JSON.stringify,
+  paths: (report): string => report.vulnerable.join('\n'),
+  summary: (report): string => buildReportSummary(report).join('\n'),
+  tables: (report): string =>
+    [
+      ...buildReportTables(report), //
+      ...buildReportSummary(report)
+    ].join('\n')
+};
+
+export const formatReport = (
+  format: SupportedReportFormat,
+  report: AuditReport
+): string => formatters[format](report);

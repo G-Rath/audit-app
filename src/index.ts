@@ -1,5 +1,5 @@
 import { SupportedPackageManager, audit } from './audit';
-import { formatReport } from './formatReport';
+import { SupportedReportFormat, formatReport } from './formatReport';
 import { generateReport } from './generateReport';
 
 export interface Options {
@@ -7,6 +7,7 @@ export interface Options {
   directory: string;
   debug: boolean;
   ignore: string[];
+  output: SupportedReportFormat;
 }
 
 export const auditApp = async (options: Options): Promise<void> => {
@@ -18,7 +19,7 @@ export const auditApp = async (options: Options): Promise<void> => {
     const results = await audit(options.directory, options.packageManager);
     const report = generateReport(options, results);
 
-    console.log(formatReport(report));
+    console.log(formatReport(options.output, report));
   } catch (error) {
     process.exitCode = 1;
 

@@ -1,18 +1,27 @@
 import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
+import { formatReport } from '../../src/formatReport';
 
 jest.mock('../../src/audit');
+jest.mock('../../src/formatReport');
 
 const mockedAudit = mocked(audit);
+const mockedFormatReport = mocked(formatReport);
 
+let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 let consoleErrorSpy: jest.SpiedFunction<typeof console.error>;
 
-const buildOptions = (options: Partial<Options> = {}): Options => ({
+const emptyOptions: Options = {
   packageManager: 'npm',
   directory: process.cwd(),
   ignore: [],
   debug: false,
+  output: 'tables'
+};
+
+const buildOptions = (options: Partial<Options> = {}): Options => ({
+  ...emptyOptions,
   ...options
 });
 
@@ -23,7 +32,24 @@ describe('auditApp', () => {
       statistics: {}
     });
 
+    consoleLogSpy = jest.spyOn(console, 'log').mockReturnValue();
     consoleErrorSpy = jest.spyOn(console, 'error').mockReturnValue();
+  });
+
+  it('formats the report based on the desired output', async () => {
+    await auditApp({ ...emptyOptions, output: 'paths' });
+
+    expect(mockedFormatReport).toHaveBeenCalledWith<
+      Parameters<typeof formatReport>
+    >('paths', expect.any(Object));
+  });
+
+  it('logs the formatted report', async () => {
+    mockedFormatReport.mockReturnValue('<formatted report>');
+
+    await auditApp({ ...emptyOptions });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('<formatted report>');
   });
 
   describe('when an error occurs', () => {

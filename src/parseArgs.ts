@@ -2,6 +2,7 @@ import fs from 'fs';
 import * as path from 'path';
 import yargs from 'yargs/yargs';
 import { SupportedPackageManager, SupportedPackageManagers } from './audit';
+import { SupportedReportFormat, SupportedReportFormats } from './formatReport';
 import { Options as ParsedArgs } from './index';
 
 type PackageManagerOption = 'auto' | SupportedPackageManager;
@@ -49,6 +50,7 @@ const parseConfigFile = (filepath: string): Record<string, unknown> => {
 interface ParsedArgvWithConfig {
   argv: Omit<ParsedArgs, 'packageManager'> & {
     packageManager: PackageManagerOption;
+    output: SupportedReportFormat;
     config?: string | false;
   };
 }
@@ -74,7 +76,11 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
         default: 'auto' as PackageManagerOption,
         choices: ['auto'].concat(SupportedPackageManagers)
       },
-      ignore: { array: true, default: [] }
+      ignore: { array: true, default: [] },
+      output: {
+        default: 'tables' as const,
+        choices: SupportedReportFormats
+      }
     })
     .strict();
 

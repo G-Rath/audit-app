@@ -15,7 +15,7 @@ export const auditApp = async (options: Options): Promise<void> => {
 
   try {
     const results = await audit(options.directory, options.packageManager);
-    const report = generateReport(options, results);
+    const report = generateReport(options.ignore, results);
 
     console.log(formatReport(options.output, report));
   } catch (error) {

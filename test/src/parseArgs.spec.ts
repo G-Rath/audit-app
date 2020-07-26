@@ -209,5 +209,44 @@ describe('parseArgs', () => {
         );
       });
     });
+
+    describe('--ignore <vulnerability>', () => {
+      beforeEach(() => writeLockFile('npm', process.cwd()));
+
+      it('can be passed multiple values', () => {
+        expect(
+          parseArgs(['--ignore', '1|a>b', '1|c>d', '1|d>e'])
+        ).toHaveProperty('ignore', ['1|a>b', '1|c>d', '1|d>e']);
+      });
+
+      it('can be passed multiple times', () => {
+        expect(
+          parseArgs([
+            '--ignore',
+            '1|a>b',
+            '--ignore',
+            '1|c>d',
+            '--ignore',
+            '1|d>e'
+          ])
+        ).toHaveProperty('ignore', ['1|a>b', '1|c>d', '1|d>e']);
+      });
+
+      it('supports both multiple values and multiple times', () => {
+        expect(
+          parseArgs(['--ignore', '1|a>b', '1|c>d', '--ignore', '1|d>e'])
+        ).toHaveProperty('ignore', ['1|a>b', '1|c>d', '1|d>e']);
+      });
+
+      describe('when there is a config file with ignores', () => {
+        it('favors the flag', () => {
+          writeConfigFile('.auditapprc.json', { ignore: ['1|a>b'] });
+
+          expect(
+            parseArgs(['--ignore', '1|c>d', '--ignore', '1|d>e'])
+          ).toHaveProperty('ignore', ['1|c>d', '1|d>e']);
+        });
+      });
+    });
   });
 });

@@ -2,7 +2,7 @@ import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
 import { formatReport } from '../../src/formatReport';
-import { Advisory } from '../../src/types';
+import { buildAdvisory } from '../buildAdvisory';
 
 jest.mock('../../src/audit');
 jest.mock('../../src/formatReport');
@@ -24,30 +24,6 @@ const emptyOptions: Options = {
 const buildOptions = (options: Partial<Options> = {}): Options => ({
   ...emptyOptions,
   ...options
-});
-
-const buildAdvisory = (advisory: Partial<Advisory>): Advisory => ({
-  findings: [],
-  id: 1500,
-  created: '2020-03-26T19:21:50.174Z',
-  updated: '2020-05-01T01:05:15.020Z',
-  deleted: null,
-  title: 'Prototype Pollution',
-  found_by: { link: '', name: 'Snyk Security Team', email: '' },
-  reported_by: { link: '', name: 'Snyk Security Team', email: '' },
-  module_name: 'yargs-parser',
-  cves: [],
-  vulnerable_versions: '',
-  patched_versions: '',
-  overview: '',
-  recommendation: '',
-  references: '',
-  access: 'public',
-  severity: 'low',
-  cwe: 'CWE-471',
-  metadata: { module_type: '', exploitability: 1, affected_components: '' },
-  url: 'https://npmjs.com/advisories/1500',
-  ...advisory
 });
 
 describe('auditApp', () => {

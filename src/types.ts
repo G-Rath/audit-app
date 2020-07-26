@@ -20,7 +20,7 @@ export interface AuditOutput {
   runId?: string;
 }
 
-export interface Action {
+interface Action {
   action: 'update' | 'install' | 'review';
   resolves: Resolution[];
   module: string;
@@ -60,18 +60,18 @@ export interface Advisory {
   url: string;
 }
 
-export interface AdvisoryFinding {
+interface AdvisoryFinding {
   version: string;
   paths: string[];
 }
 
-export interface AdvisoryActor {
+interface AdvisoryActor {
   name: string;
   link?: string;
   email?: string;
 }
 
-export interface AdvisoryMetadata {
+interface AdvisoryMetadata {
   module_type: string;
   exploitability: number;
   affected_components: string;
@@ -80,26 +80,3 @@ export interface AdvisoryMetadata {
 export interface AuditMetadata extends Required<Statistics> {
   vulnerabilities: SeverityCounts;
 }
-
-// export interface Advisory {
-//   findings: Finding[];
-//   id: number;
-//   created: string;
-//   updated: string;
-//   deleted: string | null;
-//   title: string;
-//   found_by: AdvisoryActor;
-//   reported_by: AdvisoryActor;
-//   module_name: string;
-//   cves: unknown[];
-//   vulnerable_versions: string;
-//   patched_versions: string;
-//   overview: string;
-//   recommendation: string;
-//   references: string;
-//   access: string;
-//   severity: Severity;
-//   cwe: string;
-//   metadata: AdvisoryMetadata;
-//   url: string;
-// }

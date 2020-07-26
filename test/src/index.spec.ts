@@ -21,11 +21,6 @@ const emptyOptions: Options = {
   output: 'tables'
 };
 
-const buildOptions = (options: Partial<Options> = {}): Options => ({
-  ...emptyOptions,
-  ...options
-});
-
 describe('auditApp', () => {
   beforeEach(() => {
     mockedAudit.mockResolvedValue({
@@ -102,7 +97,7 @@ describe('auditApp', () => {
     beforeEach(() => mockedAudit.mockRejectedValue(new Error('oh noes!')));
 
     describe('when debug is false', () => {
-      const options = buildOptions({ debug: false });
+      const options: Options = { ...emptyOptions, debug: false };
 
       it('does not throw', async () => {
         await expect(auditApp(options)).resolves.toBeUndefined();
@@ -132,7 +127,7 @@ describe('auditApp', () => {
     });
 
     describe('when debug is true', () => {
-      const options = buildOptions({ debug: true });
+      const options: Options = { ...emptyOptions, debug: true };
 
       it('sets the exit code', async () => {
         try {

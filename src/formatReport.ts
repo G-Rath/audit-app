@@ -188,7 +188,7 @@ const compareAdvisories = (a: Advisory, b: Advisory): number =>
 const buildReportTables = (report: AuditReport): string[] =>
   Object.values(report.advisories)
     .sort(compareAdvisories)
-    .flatMap(advisory => [buildAdvisoryTable(advisory), '\n']);
+    .map(buildAdvisoryTable);
 
 const buildReportSummary = (report: AuditReport): string[] => {
   const severities = countSeverities(report);

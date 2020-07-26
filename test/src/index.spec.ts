@@ -2,6 +2,7 @@ import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
 import { formatReport } from '../../src/formatReport';
+import { Advisory } from '../../src/types';
 
 jest.mock('../../src/audit');
 jest.mock('../../src/formatReport');
@@ -25,6 +26,30 @@ const buildOptions = (options: Partial<Options> = {}): Options => ({
   ...options
 });
 
+const buildAdvisory = (advisory: Partial<Advisory>): Advisory => ({
+  findings: [],
+  id: 1500,
+  created: '2020-03-26T19:21:50.174Z',
+  updated: '2020-05-01T01:05:15.020Z',
+  deleted: null,
+  title: 'Prototype Pollution',
+  found_by: { link: '', name: 'Snyk Security Team', email: '' },
+  reported_by: { link: '', name: 'Snyk Security Team', email: '' },
+  module_name: 'yargs-parser',
+  cves: [],
+  vulnerable_versions: '',
+  patched_versions: '',
+  overview: '',
+  recommendation: '',
+  references: '',
+  access: 'public',
+  severity: 'low',
+  cwe: 'CWE-471',
+  metadata: { module_type: '', exploitability: 1, affected_components: '' },
+  url: 'https://npmjs.com/advisories/1500',
+  ...advisory
+});
+
 describe('auditApp', () => {
   beforeEach(() => {
     mockedAudit.mockResolvedValue({
@@ -34,6 +59,51 @@ describe('auditApp', () => {
 
     consoleLogSpy = jest.spyOn(console, 'log').mockReturnValue();
     consoleErrorSpy = jest.spyOn(console, 'error').mockReturnValue();
+  });
+
+  describe('when there are vulnerabilities', () => {
+    beforeEach(() => {
+      mockedAudit.mockResolvedValue({
+        advisories: {
+          '1500': buildAdvisory({
+            findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
+            id: 1500,
+            severity: 'low'
+          }),
+          '1234': buildAdvisory({
+            findings: [{ version: '10.1.0', paths: ['three'] }],
+            id: 1234,
+            severity: 'high'
+          })
+        },
+        statistics: {}
+      });
+    });
+
+    it('sets the exit code to 1', async () => {
+      await auditApp(emptyOptions);
+
+      expect(process.exitCode).toBe(1);
+    });
+
+    describe('when the vulnerable paths are ignored', () => {
+      it('sets the exit code to 0', async () => {
+        await auditApp({
+          ...emptyOptions,
+          ignore: ['1500|one', '1500|two', '1234|three']
+        });
+
+        expect(process.exitCode).toBe(0);
+      });
+    });
+  });
+
+  describe('when there are no vulnerabilities', () => {
+    it('sets the exit code to 0', async () => {
+      await auditApp(emptyOptions);
+
+      expect(process.exitCode).toBe(0);
+    });
   });
 
   it('formats the report based on the desired output', async () => {

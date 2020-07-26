@@ -17,6 +17,8 @@ export const auditApp = async (options: Options): Promise<void> => {
     const results = await audit(options.directory, options.packageManager);
     const report = generateReport(options.ignore, results);
 
+    process.exitCode = report.vulnerable.length && 1;
+
     console.log(formatReport(options.output, report));
   } catch (error) {
     process.exitCode = 1;

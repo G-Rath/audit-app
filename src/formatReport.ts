@@ -18,7 +18,7 @@ type FalsyValue = null | undefined | 0 | false | '';
 
 const pad = (str: string): string => ` ${str.trim()} `;
 
-export const wrap = (str: string, width: number): string => {
+const wrap = (str: string, width: number): string => {
   const regexp = new RegExp(
     `.{1,${width}}(?:[\\s\u200B]+|$)|[^\\s\u200B]+?(?:[\\s\u200B]+|$)`,
     'gu'

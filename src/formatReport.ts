@@ -14,8 +14,6 @@ export type SupportedReportFormat = typeof SupportedReportFormats[number];
 
 type ReportFormatter = (report: AuditReport) => string;
 
-type FalsyValue = null | undefined | 0 | false | '';
-
 const pad = (str: string): string => ` ${str.trim()} `;
 
 const wrap = (str: string, width: number): string => {
@@ -30,9 +28,6 @@ const wrap = (str: string, width: number): string => {
     .map(l => (l.endsWith('\n') ? l.slice(0, l.length - 1) : l))
     .join('\n');
 };
-
-const f = <T>(...vs: Array<T | FalsyValue>): T[] =>
-  vs.filter((v): v is T => !!v);
 
 // const l = (...segments: Array<string | FalsyValue>): string =>
 //   f(segments).join(' ');
@@ -142,7 +137,7 @@ const buildTable = (
     contents.flatMap(([label, value], index) => {
       const lines = wrap(pad(value), maxValueWidth).split('\n');
 
-      return f(
+      return [
         index && rowSpacer,
         ...lines.map((v, i) =>
           createRow(
@@ -150,7 +145,7 @@ const buildTable = (
             [maxValueWidth, pad(v)]
           ).join('')
         )
-      );
+      ].filter((s): s is string => typeof s === 'string');
     })
   );
 };
@@ -202,7 +197,7 @@ const buildReportSummary = (report: AuditReport): string[] => {
     statistics
   } = report;
 
-  return f(
+  return [
     [
       '', // leading space
       `found ${severityColors[getHighestSeverity(severities)](
@@ -218,7 +213,9 @@ const buildReportSummary = (report: AuditReport): string[] => {
         .map(([severity, c]) => `${c} ${severityColors[severity](severity)}`)
         .join(', ')
     ]
-  ).map(arr => arr.join(' '));
+  ]
+    .filter(Array.isArray)
+    .map(arr => arr.join(' '));
 };
 
 const formatters: Record<SupportedReportFormat, ReportFormatter> = {

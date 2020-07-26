@@ -91,6 +91,14 @@ describe('parseArgs', () => {
           expect(parseArgs([])).toHaveProperty('packageManager', 'yarn');
         });
 
+        describe('when no lock files can be found', () => {
+          it('errors', () => {
+            expect(() => parseArgs([])).toThrow(
+              'unable to determine package manager'
+            );
+          });
+        });
+
         describe('when combined with the --directory flag', () => {
           it('checks the given dir for a lock file', () => {
             const dir = 'path/to/app';
@@ -145,6 +153,21 @@ describe('parseArgs', () => {
           expect(processExitSpy).toHaveBeenCalledWith(1);
           expect(consoleErrorSpy).toHaveBeenCalledWith(
             expect.stringContaining('Failed to parse config')
+          );
+        });
+      });
+
+      describe('when the path points to a config of an unsupported file type', () => {
+        it('errors', () => {
+          fs.writeFileSync('config.toml', 'hello world!');
+
+          expect(() => parseArgs(['--config', 'config.toml'])).toThrow(
+            'yargs exited'
+          );
+
+          expect(processExitSpy).toHaveBeenCalledWith(1);
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            expect.stringContaining('Unsupported file type "toml"')
           );
         });
       });

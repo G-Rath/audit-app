@@ -14,23 +14,17 @@ export type SupportedReportFormat = typeof SupportedReportFormats[number];
 
 type ReportFormatter = (report: AuditReport) => string;
 
+const countStr = (str: string): number => stripAnsi(str).length;
 const pad = (str: string): string => ` ${str.trim()} `;
-
-const wrap = (str: string, width: number): string => {
+const wrap = (str: string, width: number): string[] => {
   const regexp = new RegExp(
     `.{1,${width}}(?:[\\s\u200B]+|$)|[^\\s\u200B]+?(?:[\\s\u200B]+|$)`,
     'gu'
   );
+
   // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-  const result: string[] = str.match(regexp) ?? [];
-
-  return result
-    .map(l => (l.endsWith('\n') ? l.slice(0, l.length - 1) : l))
-    .join('\n');
+  return str.match(regexp) ?? [];
 };
-
-// const l = (...segments: Array<string | FalsyValue>): string =>
-//   f(segments).join(' ');
 
 const countSeverities = (report: AuditReport): Record<Severity, number> =>
   Object.values(report.advisories).reduce(
@@ -79,7 +73,7 @@ const buildTableSpacer = (
 const warpInTopAndBottomBorders = (
   labelWidth: number,
   valueWidth: number,
-  rows: string[]
+  rows: readonly string[]
 ): string[] => [
   buildTableSpacer(
     BoxChar.LightDownAndRight,
@@ -97,8 +91,6 @@ const warpInTopAndBottomBorders = (
     BoxChar.LightUpAndLeft
   )
 ];
-
-const countStr = (str: string): number => stripAnsi(str).length;
 
 const createRow = (
   [labelWidth, label]: [number, string],
@@ -118,8 +110,8 @@ const buildTable = (
   size = 80
 ): string[] => {
   const maxLabelWidth: number = contents
-    .map(([label]) => pad(stripAnsi(label)))
-    .reduce((width, { length }) => (length > width ? length : width), 0);
+    .map(([label]) => countStr(pad(label)))
+    .reduce((width, length) => (length > width ? length : width), 0);
 
   const maxValueWidth = size - maxLabelWidth;
 
@@ -135,7 +127,7 @@ const buildTable = (
     maxLabelWidth,
     maxValueWidth,
     contents.flatMap(([label, value], index) => {
-      const lines = wrap(pad(value), maxValueWidth).split('\n');
+      const lines = wrap(pad(value), maxValueWidth);
 
       return [
         index && rowSpacer,

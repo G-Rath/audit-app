@@ -1,0 +1,290 @@
+{
+  "actions": [
+    {
+      "isMajor": true,
+      "action": "install",
+      "resolves": [
+        {
+          "id": 1500,
+          "path": "@commitlint/cli>meow>yargs-parser",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/lint>@commitlint/rules>@commitlint/ensure>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/lint>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/load>@commitlint/resolve-extends>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/load>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "@commitlint/cli",
+      "target": "9.1.2"
+    },
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-commits-parser>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/commit-analyzer>conventional-commits-parser>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/release-notes-generator>conventional-commits-parser>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/cli>@commitlint/lint>@commitlint/parse>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@commitlint/config-conventional>conventional-changelog-conventionalcommits>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@semantic-release/changelog>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "@semantic-release/git>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/commit-analyzer>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/github>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/npm>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>@semantic-release/release-notes-generator>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1523,
+          "path": "semantic-release>lodash",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "lodash",
+      "target": "4.17.19",
+      "depth": 5
+    },
+    {
+      "action": "review",
+      "module": "yargs-parser",
+      "resolves": [
+        {
+          "id": 1500,
+          "path": "semantic-release>@semantic-release/npm>npm>libnpx>yargs>yargs-parser",
+          "dev": false,
+          "optional": false,
+          "bundled": true
+        }
+      ]
+    }
+  ],
+  "advisories": {
+    "1500": {
+      "findings": [
+        {
+          "version": "10.1.0",
+          "paths": [
+            "@commitlint/cli>meow>yargs-parser"
+          ]
+        },
+        {
+          "version": "9.0.2",
+          "paths": [
+            "semantic-release>@semantic-release/npm>npm>libnpx>yargs>yargs-parser"
+          ]
+        }
+      ],
+      "id": 1500,
+      "created": "2020-03-26T19:21:50.174Z",
+      "updated": "2020-05-01T01:05:15.020Z",
+      "deleted": null,
+      "title": "Prototype Pollution",
+      "found_by": {
+        "link": "",
+        "name": "Snyk Security Team",
+        "email": ""
+      },
+      "reported_by": {
+        "link": "",
+        "name": "Snyk Security Team",
+        "email": ""
+      },
+      "module_name": "yargs-parser",
+      "cves": [],
+      "vulnerable_versions": "<13.1.2 || >=14.0.0 <15.0.1 || >=16.0.0 <18.1.2",
+      "patched_versions": ">=13.1.2 <14.0.0 || >=15.0.1 <16.0.0 || >=18.1.2",
+      "overview": "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.  \nParsing the argument `--foo.__proto__.bar baz'` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.\n",
+      "recommendation": "Upgrade to versions 13.1.2, 15.0.1, 18.1.1 or later.",
+      "references": "- [Snyk Report](https://snyk.io/vuln/SNYK-JS-YARGSPARSER-560381)",
+      "access": "public",
+      "severity": "low",
+      "cwe": "CWE-471",
+      "metadata": {
+        "module_type": "",
+        "exploitability": 1,
+        "affected_components": ""
+      },
+      "url": "https://npmjs.com/advisories/1500"
+    },
+    "1523": {
+      "findings": [
+        {
+          "version": "4.17.15",
+          "paths": [
+            "@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-commits-parser>lodash",
+            "semantic-release>@semantic-release/commit-analyzer>conventional-commits-parser>lodash",
+            "semantic-release>@semantic-release/release-notes-generator>conventional-commits-parser>lodash",
+            "@commitlint/cli>@commitlint/lint>@commitlint/parse>lodash",
+            "@commitlint/cli>@commitlint/lint>@commitlint/rules>@commitlint/ensure>lodash",
+            "@commitlint/cli>@commitlint/lint>lodash",
+            "@commitlint/cli>@commitlint/load>@commitlint/resolve-extends>lodash",
+            "@commitlint/cli>@commitlint/load>lodash",
+            "@commitlint/cli>lodash",
+            "@commitlint/config-conventional>conventional-changelog-conventionalcommits>lodash",
+            "@semantic-release/changelog>lodash",
+            "@semantic-release/git>lodash",
+            "semantic-release>@semantic-release/commit-analyzer>lodash",
+            "semantic-release>@semantic-release/github>lodash",
+            "semantic-release>@semantic-release/npm>lodash",
+            "semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>lodash",
+            "semantic-release>@semantic-release/release-notes-generator>lodash",
+            "semantic-release>lodash"
+          ]
+        }
+      ],
+      "id": 1523,
+      "created": "2020-05-20T01:36:49.357Z",
+      "updated": "2020-07-10T19:23:46.395Z",
+      "deleted": null,
+      "title": "Prototype Pollution",
+      "found_by": {
+        "link": "",
+        "name": "posix",
+        "email": ""
+      },
+      "reported_by": {
+        "link": "",
+        "name": "posix",
+        "email": ""
+      },
+      "module_name": "lodash",
+      "cves": [
+        "CVE-2019-10744"
+      ],
+      "vulnerable_versions": "<4.17.19",
+      "patched_versions": ">=4.17.19",
+      "overview": "Versions of `lodash` prior to 4.17.19 are vulnerable to Prototype Pollution.  The function `zipObjectDeep` allows a malicious user to modify the prototype of `Object` if the property identifiers are user-supplied. Being affected by this issue requires zipping objects based on user-provided property arrays.  \n\nThis vulnerability causes the addition or modification of an existing property that will exist on all objects and may lead to Denial of Service or Code Execution under specific circumstances.",
+      "recommendation": "Upgrade to version 4.17.19 or later.",
+      "references": "- [HackerOne Report](https://hackerone.com/reports/712065)\n- [GitHub Issue](https://github.com/lodash/lodash/issues/4744)",
+      "access": "public",
+      "severity": "low",
+      "cwe": "CWE-471",
+      "metadata": {
+        "module_type": "",
+        "exploitability": 3,
+        "affected_components": ""
+      },
+      "url": "https://npmjs.com/advisories/1523"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 20,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 818,
+    "devDependencies": 0,
+    "optionalDependencies": 6,
+    "totalDependencies": 824
+  },
+  "runId": "1fbc9fc6-ad57-4382-89ff-9cccc2326891"
+}

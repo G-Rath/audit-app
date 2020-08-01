@@ -1,16 +1,72 @@
 # audit-app
 
-A cli tool for auditing apps & packages using their respective package managers.
+A cli tool for auditing apps & packages using their respective package managers,
+outputting the results in a form that makes it easy to triage advisories, and
+providing support for ignoring advisories to keep your CI passing without having
+to sacrifice security.
 
-## Output formats
+# Getting Started
 
-`audit-app` can output its report in a few different formats, depending on the
-use-case for the current audit run.
+To run `audit-app` as a once-off against an app, you can use `npx`:
 
-You can specify which format to use with the `--output` flag, with the default
-format being `tables`.
+    npx audit-app
 
-Here's a brief rundown of the supported formats, and their use-cases:
+If you want to use `audit-app` regularly as part of your local development flow,
+you can install it globally:
+
+    npm install --global audit-app
+
+## Options
+
+All options can be provided in either camelCase or kebab-case format. These
+options can be set either when calling `audit-app` via the commandline, or via a
+JSON config file.
+
+## `--directory`, `--dir`, `-d`
+
+Default: the current working directory
+
+Sets the directory that `audit-app` will operate in. This effects other path
+related options like `--package-manager` and `--config`.
+
+    audit-app --package-manager pnpm
+
+### `--config`, `-c`
+
+Default: `.auditapprc.json`
+
+Points `audit-app` to the configuration file to load options from. By default
+`audit-app` will look for a file called `.auditapprc.json` in the directory that
+is being audited (which can be set using `--directory`).
+
+The configuration file must contain standard JSON, with a top-level object, and
+with no comments, trailing commas, or single-quotes:
+
+```json
+{
+  "packageManager": "yarn",
+  "ignore": ["1179|mkdirp>minimist"]
+}
+```
+
+You can disable loading from a config file using `--no-config.`
+
+## `--package-manager`, `-p`
+
+Default: `auto`  
+Supported values: `auto`, `npm`, `yarn`, `pnpm`
+
+Sets the package manager `audit-app` will use to perform the audit. If set to
+`auto`, the package manager will be determined based on what lock files are
+present in the directory being audited.
+
+## `--output`, `-o`
+
+Default: `tables`  
+Supported values: `tables`, `summary`, `paths`, `json`
+
+Sets the format that `audit-app` should use to output the audit report. Here's a
+brief rundown of the supported formats, and their use-cases:
 
 ### `summary` format
 
@@ -124,3 +180,121 @@ Clipboard contents:
 
 Outputs the report as JSON using `JSON.stringify` so that it can be easily used
 by other tools.
+
+## `--ignore`, `-i`
+
+Default: []
+
+Tells `audit-app` to ignore a vulnerability when determining if the audit
+results should result in a failed audit run.
+
+In the context of `audit-app`, a "vulnerability" is an instance of an advisory,
+represented by a string made up of the advisory's id, and the path to the
+package on the dependency tree that is affected by the advisory, separated by a
+pipe (`|`); for example:
+
+    1179|mkdirp>minimist
+
+You can provide this flag multiple times to ignore multiple vulnerabilities:
+
+```shell script
+audit-app \
+  --ignore '1213|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore '1213|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop' \
+  --ignore '1213|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore '1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore '1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop' \
+  --ignore '1213|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop' \
+  --ignore '1213|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop'
+```
+
+However, we recommend using a `.auditapprc.json` file to make it easier to track
+and update the list of ignored vulnerabilities:
+
+```json
+{
+  "packageManager": "yarn",
+  "ignore": [
+    "1213|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop",
+    "1213|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop",
+    "1213|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop",
+    "1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop",
+    "1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop",
+    "1213|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop",
+    "1213|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop"
+  ]
+}
+```
+
+## How it works
+
+When run, `audit-app` calls the audit command of either `npm`, `yarn`, or
+`pnpm`, and parses the results, normalising the output into an "audit report".
+
+An audit report is an object with the following structure:
+
+```ts
+export interface AuditReport {
+  statistics: Statistics;
+  advisories: Advisories;
+  vulnerable: string[];
+  ignored: string[];
+  missing: string[];
+}
+```
+
+The `statistics` property holds an object that contains optional details about
+aspects of the auditing run, and it's results, such as counts on the different
+package types that were involved (total, dev, optional, etc).
+
+The `advisories` property is an object containing the advisories that were found
+to effect at least one package in the tree during auditing, mapped by their id.
+
+The `vulnerable`, `ignored`, and `missing` properties are arrays which list the
+vulnerabilities that were (or in the case of `missing`, were not) found, based
+on the findings for each advisory.
+
+In the context of `audit-app`, a "vulnerability" is an instance of an advisory,
+represented by a string made up of the advisory's id, and the path to the
+package on the dependency tree that is affected by the advisory, separated by a
+pipe (`|`).
+
+After auditing has finished, `audit-app` runs through the findings of each
+advisory to create a list of the vulnerabilities that exist in the app that was
+just audited, which is then cross-referenced with a list of vulnerabilities that
+should be ignored, with any vulnerability found in both lists being removed from
+`vulnerable`. If a vulnerability is found in `ignored` that is not in
+`vulnerable`, it's moved out of the `ignored` array into `missing`.
+
+The ignored list is populated using the `ignore` flag, which can be specified
+multiple times:
+
+```
+audit-app \
+  --ignore 1179|mkdirp>minimist
+```
+
+There is no support for ignoring an entire advisory, because doing so would mean
+new instances of an advisory could be introduced via an unknown path. For the
+same reason you also cannot ignore all advisories of a specific level.
+
+While its possible that a very popular package could get an advisory posted
+against it that goes unpatch for a long period, resulting in a very large ignore
+list, there are two things to keep in mind:
+
+1. Your configuration file represents the security health of your application -
+   the fewer vulnerabilities you need to ignore, the healthier your application
+   is. This also means you should apply the same way of thinking as you would to
+   aspects such as size, dependency count, performance, etc.
+
+2. Advisories are _known_ vulnerabilities, meaning bad actors can find out
+   exactly how to exploit a package with very little work.
+
+Ultimately, in the same way that you'd consider replacing a dependency that was
+creating a bottleneck for your application, or a dependency that was excessively
+large, you should consider replacing a dependency if it's making your app less
+secure.
+
+The `paths` output format (detailed below) can be useful in updating your
+ignores list by providing a list of all the current vulnerabilities in your apps
+dependency tree that can be copied & pasted.

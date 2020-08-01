@@ -59,11 +59,13 @@ const DefaultConfigFile = '.auditapprc.json';
 
 const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
   const { argv }: ParsedArgvWithConfig = yargs(args)
+    .completion('completion', false)
     .options({
       config: {
+        alias: 'c',
         string: true,
         config: !!configPath,
-        default: DefaultConfigFile,
+        default: configPath ?? DefaultConfigFile,
         configParser: parseConfigFile
       },
       debug: { boolean: true, default: false },
@@ -74,7 +76,11 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
       },
       packageManager: {
         default: 'auto' as PackageManagerOption,
-        choices: ['auto'].concat(SupportedPackageManagers)
+        choices: ['auto'].concat(SupportedPackageManagers),
+        description: [
+          'Specifies which package manager to use for auditing.',
+          '"auto" will attempt to figure out what to use based on lock files.'
+        ].join('\n')
       },
       ignore: { array: true, default: [] },
       output: {
@@ -84,14 +90,19 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
     })
     .strict();
 
+  const pathToDefaultConfig = path.join(argv.directory, DefaultConfigFile);
+
   if (
     !configPath &&
     argv.config &&
     // we don't want to error if the default config file doesn't exist
     // eslint-disable-next-line no-sync
-    (argv.config !== DefaultConfigFile || fs.existsSync(DefaultConfigFile))
+    (argv.config !== DefaultConfigFile || fs.existsSync(pathToDefaultConfig))
   ) {
-    return parseWithConfig(args, argv.config);
+    return parseWithConfig(
+      args,
+      argv.config === DefaultConfigFile ? pathToDefaultConfig : argv.config
+    );
   }
 
   const packageManager =

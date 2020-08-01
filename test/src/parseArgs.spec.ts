@@ -69,6 +69,24 @@ describe('parseArgs', () => {
         );
       });
     });
+
+    describe('when the --directory flag is set', () => {
+      beforeEach(() => {
+        fs.mkdirSync('path/to/app', { recursive: true });
+
+        writeConfigFile('.auditapprc.json', { packageManager: 'npm' });
+        writeConfigFile('path/to/app/.auditapprc.json', {
+          packageManager: 'yarn'
+        });
+      });
+
+      it('looks in the given directory for the rc file', () => {
+        expect(parseArgs(['--directory', 'path/to/app'])).toHaveProperty(
+          'packageManager',
+          'yarn'
+        );
+      });
+    });
   });
 
   describe('flags', () => {
@@ -182,6 +200,18 @@ describe('parseArgs', () => {
           expect(consoleErrorSpy).toHaveBeenCalledWith(
             expect.stringContaining('ENOENT: no such file or directory')
           );
+        });
+      });
+
+      describe('when the --directory flag is set', () => {
+        beforeEach(() => {
+          writeConfigFile('config.json', { packageManager: 'yarn' });
+        });
+
+        it('makes no difference', () => {
+          expect(
+            parseArgs(['--config', 'config.json', '--directory', 'path/to/app'])
+          ).toHaveProperty('packageManager', 'yarn');
         });
       });
     });

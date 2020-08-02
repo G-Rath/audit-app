@@ -93,6 +93,18 @@ describe('formatReport', () => {
         );
       });
     });
+
+    describe('when dependency statistics are present', () => {
+      it('includes them in the summary', () => {
+        expect(
+          formatReportAndStripAnsi('summary', {
+            statistics: { totalDependencies: 5 }
+          })
+        ).toMatchInlineSnapshot(
+          `" found 0 vulnerabilities (including 0 ignored) across 5 packages"`
+        );
+      });
+    });
   });
 
   describe('when the format is "tables"', () => {

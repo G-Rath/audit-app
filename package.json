@@ -28,11 +28,11 @@
     "build": "rm -rf lib/* && tsc -p tsconfig.build.json",
     "cli": "ts-node -T src/cli.ts",
     "lint": "eslint . --ignore-pattern '!.eslintrc.js' --ext js,ts",
-    "prepare": "echo",
     "prepack": "npm run build",
+    "prepare": "echo",
     "test": "jest",
-    "typecheck": "ttsc -p . --noEmit",
-    "tools:generate-fixture-data": "tools/generate-fixture-data.ts"
+    "tools:generate-fixture-data": "tools/generate-fixture-data.ts",
+    "typecheck": "ttsc -p . --noEmit"
   },
   "prettier": "prettier-config-ackama",
   "dependencies": {

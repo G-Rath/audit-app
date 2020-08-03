@@ -1,4 +1,6 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.1.0...HEAD) (2020-08-03)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.1.1...HEAD) (2020-08-03)
+
+# [0.1.1](https://github.com/G-Rath/audit-app/compare/v0.1.0...v0.1.1) (2020-08-03)
 
 ### Bug Fixes
 

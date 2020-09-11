@@ -9,7 +9,7 @@ const config = {
   },
   env: { node: true },
   extends: ['ackama', 'ackama/@typescript-eslint'],
-  ignorePatterns: ['!.eslintrc.js', 'coverage', 'lib', 'infra'],
+  ignorePatterns: [],
   overrides: [
     {
       files: ['test/**'],
@@ -18,9 +18,6 @@ const config = {
     }
   ],
   rules: {
-    '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/no-unsafe-assignment': 'error',
-    '@typescript-eslint/prefer-reduce-type-parameter': 'error',
     'import/no-deprecated': 'error'
   }
 };

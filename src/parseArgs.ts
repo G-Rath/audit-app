@@ -8,7 +8,7 @@ import { Options as ParsedArgs } from './index';
 type PackageManagerOption = 'auto' | SupportedPackageManager;
 
 const determinePackageManager = (dir: string): SupportedPackageManager => {
-  // eslint-disable-next-line no-sync
+  // eslint-disable-next-line node/no-sync
   const files = fs.readdirSync(dir);
 
   if (files.includes('package-lock.json')) {
@@ -33,7 +33,7 @@ const parseConfigFile = (filepath: string): Record<string, unknown> => {
     throw new Error(`Unsupported file type "${ext}"`);
   }
 
-  // eslint-disable-next-line no-sync
+  // eslint-disable-next-line node/no-sync
   const contents = fs.readFileSync(filepath).toString();
 
   try {
@@ -96,7 +96,7 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
     !configPath &&
     argv.config &&
     // we don't want to error if the default config file doesn't exist
-    // eslint-disable-next-line no-sync
+    // eslint-disable-next-line node/no-sync
     (argv.config !== DefaultConfigFile || fs.existsSync(pathToDefaultConfig))
   ) {
     return parseWithConfig(

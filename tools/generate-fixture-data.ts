@@ -1,6 +1,6 @@
 #!/usr/bin/env ts-node-transpile-only
 
-/* eslint-disable no-sync */
+/* eslint-disable node/no-sync */
 
 import { spawn } from 'child_process';
 import * as fs from 'fs';

@@ -1,10 +1,27 @@
 import stripAnsi from 'strip-ansi';
 import { SupportedReportFormat, formatReport } from '../../src/formatReport';
 import { AuditReport } from '../../src/generateReport';
+import { SeverityCountsWithTotal } from '../../src/types';
 import { buildAdvisory } from '../buildAdvisory';
 
+const zeroedSeverityCountsWithTotal: SeverityCountsWithTotal = {
+  total: 0,
+  info: 0,
+  low: 0,
+  moderate: 0,
+  high: 0,
+  critical: 0
+};
+
+const emptyStatistics = {
+  dependencies: {},
+  vulnerable: zeroedSeverityCountsWithTotal,
+  severities: zeroedSeverityCountsWithTotal,
+  ignored: zeroedSeverityCountsWithTotal
+};
+
 const emptyReport: AuditReport = {
-  statistics: {},
+  statistics: emptyStatistics,
   advisories: {},
   vulnerable: [],
   ignored: [],
@@ -35,8 +52,10 @@ describe('formatReport', () => {
     describe('when there are advisories', () => {
       it('reports how many vulnerabilities were found', () => {
         const summary = formatReportAndStripAnsi('summary', {
-          ...emptyReport,
-          vulnerable: ['one', 'two', 'three']
+          statistics: {
+            ...emptyStatistics,
+            severities: { ...zeroedSeverityCountsWithTotal, total: 3 }
+          }
         });
 
         expect(summary).toMatch(/found 3 vulnerabilities/iu);
@@ -44,9 +63,10 @@ describe('formatReport', () => {
 
       it('includes how many vulnerabilities were ignored', () => {
         const summary = formatReportAndStripAnsi('summary', {
-          ...emptyReport,
-          vulnerable: ['one', 'two', 'three'],
-          ignored: ['four', 'five']
+          statistics: {
+            ...emptyStatistics,
+            ignored: { ...zeroedSeverityCountsWithTotal, total: 2 }
+          }
         });
 
         expect(summary).toMatch(/\(including 2 ignored\)/iu);
@@ -54,20 +74,15 @@ describe('formatReport', () => {
 
       it('gives a breakdown of the severities', () => {
         const summary = formatReportAndStripAnsi('summary', {
-          ...emptyReport,
-          advisories: {
-            '1500': buildAdvisory({
-              findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
-              id: 1500,
-              severity: 'low'
-            }),
-            '1234': buildAdvisory({
-              findings: [{ version: '10.1.0', paths: ['three'] }],
-              id: 1234,
-              severity: 'high'
-            })
-          },
-          vulnerable: ['one', 'two', 'three']
+          statistics: {
+            ...emptyStatistics,
+            vulnerable: {
+              ...zeroedSeverityCountsWithTotal,
+              total: 3,
+              low: 2,
+              high: 1
+            }
+          }
         });
 
         expect(summary).toMatch('2 low');
@@ -98,7 +113,10 @@ describe('formatReport', () => {
       it('includes them in the summary', () => {
         expect(
           formatReportAndStripAnsi('summary', {
-            statistics: { totalDependencies: 5 }
+            statistics: {
+              ...emptyStatistics,
+              dependencies: { totalDependencies: 5 }
+            }
           })
         ).toMatchInlineSnapshot(
           `" found 0 vulnerabilities (including 0 ignored) across 5 packages"`
@@ -349,7 +367,7 @@ describe('formatReport', () => {
           ignored: ['2|a>b']
         })
       ).toMatchInlineSnapshot(
-        `"{\\"statistics\\":{},\\"advisories\\":{},\\"vulnerable\\":[\\"1|a\\",\\"1|a>b\\",\\"2|c>b\\"],\\"ignored\\":[\\"2|a>b\\"],\\"missing\\":[]}"`
+        `"{\\"statistics\\":{\\"dependencies\\":{},\\"vulnerable\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"severities\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"ignored\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0}},\\"advisories\\":{},\\"vulnerable\\":[\\"1|a\\",\\"1|a>b\\",\\"2|c>b\\"],\\"ignored\\":[\\"2|a>b\\"],\\"missing\\":[]}"`
       );
     });
   });

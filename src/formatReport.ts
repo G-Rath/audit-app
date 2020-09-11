@@ -26,19 +26,6 @@ const wrap = (str: string, width: number): string[] => {
   return str.match(regexp) ?? [];
 };
 
-const countSeverities = (report: AuditReport): Record<Severity, number> =>
-  Object.values(report.advisories).reduce(
-    (counts, advisory) => {
-      counts[advisory.severity] += advisory.findings.reduce(
-        (sum, findings) => sum + findings.paths.length,
-        0
-      );
-
-      return counts;
-    },
-    { info: 0, low: 0, moderate: 0, high: 0, critical: 0 }
-  );
-
 enum BoxChar {
   LightVertical = '│',
   LightVerticalAndLeft = '┤',
@@ -169,7 +156,7 @@ const buildAdvisoryTable = (advisory: Advisory): string =>
   ]).join('\n');
 
 const getHighestSeverity = (severities: SeverityCounts): Severity =>
-  (Object.keys(severities).reverse() as Array<keyof SeverityCounts>).find(
+  (Object.keys(severityColors).reverse() as Array<keyof SeverityCounts>).find(
     severity => severities[severity] > 0
   ) ?? 'info';
 
@@ -183,26 +170,31 @@ const buildReportTables = (report: AuditReport): string[] =>
     .map(buildAdvisoryTable);
 
 const buildReportSummary = (report: AuditReport): string[] => {
-  const severities = countSeverities(report);
   const {
-    vulnerable: { length: vulnerabilities },
-    statistics
+    statistics: {
+      dependencies, //
+      severities,
+      vulnerable,
+      ignored
+    }
   } = report;
 
   return [
     [
       '', // leading space
       `found ${severityColors[getHighestSeverity(severities)](
-        vulnerabilities
+        severities.total
       )} vulnerabilities`,
-      `(including ${report.ignored.length} ignored)`,
-      `across ${statistics.totalDependencies ?? '"some"'} packages`
+      `(including ${ignored.total} ignored)`,
+      `across ${dependencies.totalDependencies ?? '"some"'} packages`
     ],
-    vulnerabilities && [
+    vulnerable.total && [
       '\t  \\:',
-      (Object.entries(severities) as Array<[Severity, number]>)
-        .filter(([, count]) => count > 0)
-        .map(([severity, c]) => `${c} ${severityColors[severity](severity)}`)
+      Severities.filter(severity => vulnerable[severity] > 0)
+        .map(
+          severity =>
+            `${vulnerable[severity]} ${severityColors[severity](severity)}`
+        )
         .join(', ')
     ]
   ]

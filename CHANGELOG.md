@@ -1,5 +1,9 @@
 # [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.1.1...HEAD) (2020-08-03)
 
+### Features
+
+- expand `statistics` object in audit report to include more details
+
 # [0.1.1](https://github.com/G-Rath/audit-app/compare/v0.1.0...v0.1.1) (2020-08-03)
 
 ### Bug Fixes

@@ -73,7 +73,7 @@ describe('audit', () => {
       delete auditOutput.metadata.vulnerabilities;
 
       expect(results.advisories).toStrictEqual(auditOutput.advisories);
-      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+      expect(results.dependencyStatistics).toStrictEqual(auditOutput.metadata);
     });
 
     it('parses line-by-line', async () => {
@@ -92,7 +92,7 @@ describe('audit', () => {
       delete auditOutput.metadata.vulnerabilities;
 
       expect(results.advisories).toStrictEqual(auditOutput.advisories);
-      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+      expect(results.dependencyStatistics).toStrictEqual(auditOutput.metadata);
     });
 
     describe('when the json is not parsable', () => {
@@ -165,7 +165,7 @@ describe('audit', () => {
       delete auditOutput.metadata.vulnerabilities;
 
       expect(results.advisories).toStrictEqual(auditOutput.advisories);
-      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+      expect(results.dependencyStatistics).toStrictEqual(auditOutput.metadata);
     });
 
     it('parses line-by-line', async () => {
@@ -184,7 +184,7 @@ describe('audit', () => {
       delete auditOutput.metadata.vulnerabilities;
 
       expect(results.advisories).toStrictEqual(auditOutput.advisories);
-      expect(results.statistics).toStrictEqual(auditOutput.metadata);
+      expect(results.dependencyStatistics).toStrictEqual(auditOutput.metadata);
     });
 
     describe('when the json is not parsable', () => {
@@ -248,7 +248,7 @@ describe('audit', () => {
       const npmResults = JSON.parse(fixture.npm) as AuditOutput;
 
       expect(results.advisories).toStrictEqual(npmResults.advisories);
-      expect(results.statistics).toMatchInlineSnapshot(`
+      expect(results.dependencyStatistics).toMatchInlineSnapshot(`
         Object {
           "dependencies": 2,
           "devDependencies": 0,
@@ -273,7 +273,7 @@ describe('audit', () => {
         const npmResults = JSON.parse(fixture.npm) as AuditOutput;
 
         expect(results.advisories).toStrictEqual(npmResults.advisories);
-        expect(results.statistics).toMatchInlineSnapshot(`
+        expect(results.dependencyStatistics).toMatchInlineSnapshot(`
           Object {
             "dependencies": 3,
             "devDependencies": 0,
@@ -300,7 +300,7 @@ describe('audit', () => {
 
         const results = await auditRun;
 
-        expect(results.statistics).toMatchInlineSnapshot(`Object {}`);
+        expect(results.dependencyStatistics).toMatchInlineSnapshot(`Object {}`);
       });
     });
 

@@ -10,6 +10,8 @@ import {
 } from './types';
 import ReadableStream = NodeJS.ReadableStream;
 
+type DependencyStatistics = Statistics['dependencies'];
+
 export const SupportedPackageManagers = ['npm', 'pnpm', 'yarn'] as const;
 
 export type SupportedPackageManager = typeof SupportedPackageManagers[number];
@@ -43,7 +45,9 @@ interface NpmError {
 
 type ParsedNpmOutput = AuditOutput | NpmError;
 
-const pickStatistics = (metadata: AuditMetadata): Statistics => {
+const extractDependencyStatistics = (
+  metadata: AuditMetadata
+): DependencyStatistics => {
   const statistics = { ...metadata };
 
   delete statistics.vulnerabilities;
@@ -64,13 +68,13 @@ const tryOrCall = <TParams extends unknown[]>(
 
 export interface AuditResults {
   advisories: Advisories;
-  statistics: Statistics;
+  dependencyStatistics: DependencyStatistics;
 }
 
 type AuditResultsCollector = (stdout: ReadableStream) => Promise<AuditResults>;
 
 const collectYarnAuditResults: AuditResultsCollector = async stdout => {
-  const results: AuditResults = { advisories: {}, statistics: {} };
+  const results: AuditResults = { advisories: {}, dependencyStatistics: {} };
 
   return new Promise<AuditResults>((resolve, reject) => {
     stdout.on('error', reject);
@@ -81,7 +85,9 @@ const collectYarnAuditResults: AuditResultsCollector = async stdout => {
         const parsedLine = JSON.parse(line) as ParsedJsonLine;
 
         if (parsedLine.type === 'auditSummary') {
-          results.statistics = pickStatistics(parsedLine.data);
+          results.dependencyStatistics = extractDependencyStatistics(
+            parsedLine.data
+          );
         }
 
         if (parsedLine.type === 'auditAdvisory') {
@@ -127,7 +133,9 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
 
         resolve({
           advisories: auditOutput.advisories,
-          statistics: pickStatistics(auditOutput.metadata)
+          dependencyStatistics: extractDependencyStatistics(
+            auditOutput.metadata
+          )
         });
       }, reject)
     );

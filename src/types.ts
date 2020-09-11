@@ -1,14 +1,22 @@
 export type Severity = 'info' | 'low' | 'moderate' | 'high' | 'critical';
 
 export type SeverityCounts = Record<Severity, number>;
+export type SeverityCountsWithTotal = Record<Severity | 'total', number>;
 
 export type Advisories = Record<string, Advisory>;
 
-export interface Statistics {
+interface DependencyStatistics {
   dependencies?: number;
   devDependencies?: number;
   optionalDependencies?: number;
   totalDependencies?: number;
+}
+
+export interface Statistics {
+  dependencies: DependencyStatistics;
+  severities: SeverityCountsWithTotal;
+  vulnerable: SeverityCountsWithTotal;
+  ignored: SeverityCountsWithTotal;
 }
 
 export interface AuditOutput {
@@ -77,6 +85,6 @@ interface AdvisoryMetadata {
   affected_components: string;
 }
 
-export interface AuditMetadata extends Required<Statistics> {
+export interface AuditMetadata extends Required<DependencyStatistics> {
   vulnerabilities: SeverityCounts;
 }

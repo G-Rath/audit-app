@@ -25,7 +25,7 @@ describe('auditApp', () => {
   beforeEach(() => {
     mockedAudit.mockResolvedValue({
       advisories: {},
-      statistics: {}
+      dependencyStatistics: {}
     });
 
     consoleLogSpy = jest.spyOn(console, 'log').mockReturnValue();
@@ -47,7 +47,7 @@ describe('auditApp', () => {
             severity: 'high'
           })
         },
-        statistics: {}
+        dependencyStatistics: {}
       });
     });
 

@@ -45,7 +45,7 @@
     "@jest/types": "^26.3.0",
     "@types/eslint": "^7.2.2",
     "@types/jest": "^26.0.13",
-    "@types/node": "^14.0.27",
+    "@types/node": "^14.10.1",
     "@types/readline-transform": "^1.0.0",
     "@types/yargs": "^15.0.5",
     "@typescript-eslint/eslint-plugin": "^4.1.0",
@@ -63,9 +63,9 @@
     "prettier": "^2.1.1",
     "prettier-config-ackama": "^0.1.2",
     "ts-jest": "^26.3.0",
-    "ts-node": "^8.10.2",
-    "ttypescript": "^1.5.10",
-    "typescript": "^3.9.7",
+    "ts-node": "^9.0.0",
+    "ttypescript": "^1.5.12",
+    "typescript": "^4.0.2",
     "unionfs": "^4.4.0"
   }
 }

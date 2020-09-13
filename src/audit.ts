@@ -48,7 +48,7 @@ type ParsedNpmOutput = AuditOutput | NpmError;
 const extractDependencyStatistics = (
   metadata: AuditMetadata
 ): DependencyStatistics => {
-  const statistics = { ...metadata };
+  const statistics: Partial<AuditMetadata> = { ...metadata };
 
   delete statistics.vulnerabilities;
 

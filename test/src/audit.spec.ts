@@ -5,6 +5,11 @@ import { audit } from '../../src/audit';
 import { AuditOutput } from '../../src/types';
 import fixtures from '../fixtures';
 
+type AuditOutputWithOptionalVulnerabilities = Omit<AuditOutput, 'metadata'> & {
+  metadata: Omit<AuditOutput['metadata'], 'vulnerabilities'> &
+    Partial<Pick<AuditOutput['metadata'], 'vulnerabilities'>>;
+};
+
 jest.mock('child_process');
 
 const spawnMock = mocked(spawn);
@@ -68,7 +73,9 @@ describe('audit', () => {
 
       const results = await auditRun;
 
-      const auditOutput = JSON.parse(fixture.npm) as AuditOutput;
+      const auditOutput = JSON.parse(
+        fixture.npm
+      ) as AuditOutputWithOptionalVulnerabilities;
 
       delete auditOutput.metadata.vulnerabilities;
 
@@ -87,7 +94,9 @@ describe('audit', () => {
 
       const results = await auditRun;
 
-      const auditOutput = JSON.parse(fixture.npm) as AuditOutput;
+      const auditOutput = JSON.parse(
+        fixture.npm
+      ) as AuditOutputWithOptionalVulnerabilities;
 
       delete auditOutput.metadata.vulnerabilities;
 
@@ -160,7 +169,9 @@ describe('audit', () => {
 
       const results = await auditRun;
 
-      const auditOutput = JSON.parse(fixture.pnpm) as AuditOutput;
+      const auditOutput = JSON.parse(
+        fixture.pnpm
+      ) as AuditOutputWithOptionalVulnerabilities;
 
       delete auditOutput.metadata.vulnerabilities;
 
@@ -179,7 +190,9 @@ describe('audit', () => {
 
       const results = await auditRun;
 
-      const auditOutput = JSON.parse(fixture.pnpm) as AuditOutput;
+      const auditOutput = JSON.parse(
+        fixture.pnpm
+      ) as AuditOutputWithOptionalVulnerabilities;
 
       delete auditOutput.metadata.vulnerabilities;
 

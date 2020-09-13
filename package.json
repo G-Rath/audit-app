@@ -39,7 +39,7 @@
     "chalk": "^4.1.0",
     "readline-transform": "^1.0.0",
     "strip-ansi": "^6.0.0",
-    "yargs": "^15.4.1"
+    "yargs": "^16.0.3"
   },
   "devDependencies": {
     "@jest/types": "^26.3.0",

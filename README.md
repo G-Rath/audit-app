@@ -176,10 +176,47 @@ Clipboard contents:
 > 1523|@commitlint/cli>@commitlint/load>@commitlint/resolve-extends>lodash\
 > 1523|@commitlint/cli>@commitlint/load>lodash
 
+If you're using a json config, you can use `jq` to convert the output into a
+valid JSON array that you can paste straight into your config:
+
+```shell script
+audit-app --output paths | grep '>@commitlint/load> | jq -R '[inputs]'
+```
+
+You can do this in PowerShell like so:
+
+```powershell
+(audit-app --output paths).split('\n') | ConvertTo-Json
+```
+
 ### `json` format
 
 Outputs the report as JSON using `JSON.stringify` so that it can be easily used
 by other tools.
+
+If you're ignoring vulnerabilities using a json config, you can pipe the output
+of the json format to a program like `jq` to pick the `vulnerable` array
+
+If you have a lot of vulnerabilities that you wish to ignore, you can pipe the
+json output to a program like `jq` to select just the `vulnerable` array and get
+a valid json array as output for your clipboard:
+
+```shell script
+audit-app --format json | jq '.vulnerable'
+```
+
+If you wish to select only some vulnerabilities, you can use filters like so:
+
+```shell script
+audit-app --format json | jq '.vulnerable | map(select(startswith("1556")))'
+audit-app --format json | jq '.vulnerable | map(select(startswith("1556")))'
+```
+
+If you're using Powershell, you can do this without `jq` like so:
+
+```powershell
+(audit-app --format json | ConvertFrom-Json).vulnerable | ConvertTo-Json
+```
 
 ## `--ignore`, `-i`
 

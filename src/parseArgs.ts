@@ -37,7 +37,11 @@ const parseConfigFile = (filepath: string): Record<string, unknown> => {
   const contents = fs.readFileSync(filepath).toString();
 
   try {
-    return JSON.parse(contents) as Record<string, unknown>;
+    const config = JSON.parse(contents) as Record<string, unknown>;
+
+    delete config.$schema;
+
+    return config;
   } catch (e) {
     const err = e as Error;
 

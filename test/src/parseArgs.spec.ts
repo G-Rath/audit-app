@@ -6,7 +6,9 @@ import { Options as ParsedArgs } from '../../src';
 import { SupportedPackageManager } from '../../src/audit';
 import { parseArgs } from '../../src/parseArgs';
 
-const writeConfigFile = (name: string, config: Partial<ParsedArgs>): void => {
+type ConfigFileContents = Partial<ParsedArgs & { $schema: string }>;
+
+const writeConfigFile = (name: string, config: ConfigFileContents): void => {
   fs.writeFileSync(name, JSON.stringify(config, null, 2));
 };
 
@@ -48,6 +50,21 @@ describe('parseArgs', () => {
 
     it('parses the rc file', () => {
       expect(parseArgs([])).toHaveProperty('packageManager', 'yarn');
+    });
+
+    describe('when the config file contains the $schema property', () => {
+      beforeEach(() => {
+        writeConfigFile('.auditapprc.json', {
+          $schema: '../config.schema.json',
+          packageManager: 'yarn'
+        });
+      });
+
+      it('does not error when parsing', () => {
+        expect(() => parseArgs([])).not.toThrow();
+
+        expect(parseArgs([])).toHaveProperty('packageManager', 'yarn');
+      });
     });
 
     it('favors flags over config', () => {

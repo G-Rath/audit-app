@@ -1,4 +1,14 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.2.0...HEAD) (2020-09-13)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.3.0...HEAD) (2020-09-18)
+
+# [0.3.0](https://github.com/G-Rath/audit-app/compare/v0.2.0...v0.3.0) (2020-09-18)
+
+### Features
+
+- publish `config.schema.json` to use to valid config files
+
+### Bug Fixes
+
+- ignore `$schema` property if present in config file
 
 # [0.2.0](https://github.com/G-Rath/audit-app/compare/v0.1.1...v0.2.0) (2020-09-13)
 

@@ -54,7 +54,7 @@ describe('formatReport', () => {
         const summary = formatReportAndStripAnsi('summary', {
           statistics: {
             ...emptyStatistics,
-            severities: { ...zeroedSeverityCountsWithTotal, total: 3 }
+            severities: { ...zeroedSeverityCountsWithTotal, total: 3, low: 3 }
           }
         });
 

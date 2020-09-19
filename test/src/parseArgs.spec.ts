@@ -1,7 +1,7 @@
 /* eslint-disable node/no-sync */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import { Options as ParsedArgs } from '../../src';
 import { SupportedPackageManager } from '../../src/audit';
 import { parseArgs } from '../../src/parseArgs';

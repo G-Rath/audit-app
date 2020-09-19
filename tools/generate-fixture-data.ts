@@ -3,8 +3,8 @@
 /* eslint-disable node/no-sync */
 
 import { spawn } from 'child_process';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import {
   SupportedPackageManager,
   SupportedPackageManagers

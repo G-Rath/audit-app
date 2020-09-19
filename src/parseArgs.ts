@@ -1,5 +1,5 @@
 import fs from 'fs';
-import * as path from 'path';
+import path from 'path';
 import yargs from 'yargs/yargs';
 import { SupportedPackageManager, SupportedPackageManagers } from './audit';
 import { SupportedReportFormat, SupportedReportFormats } from './formatReport';

@@ -1,4 +1,11 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.3.0...HEAD) (2020-09-18)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.3.1...HEAD) (YYYY-MM-DD)
+
+# [0.3.1](https://github.com/G-Rath/audit-app/compare/v0.3.0...v0.3.1) (2020-09-19)
+
+### Bug Fixes
+
+- adjust imports to slightly reduce package size ([3dcd1f6d][])
+- use singular or plural form for words based on related counts ([7f3c0c9c][])
 
 # [0.3.0](https://github.com/G-Rath/audit-app/compare/v0.2.0...v0.3.0) (2020-09-18)
 
@@ -27,6 +34,8 @@
 
 Initial Release 🎉
 
+[3dcd1f6d]: https://github.com/G-Rath/audit-app/commit/3dcd1f6d
+[7f3c0c9c]: https://github.com/G-Rath/audit-app/commit/7f3c0c9c
 [bfda8ade]: https://github.com/G-Rath/audit-app/commit/bfda8ade
 [f898766e]: https://github.com/G-Rath/audit-app/commit/f898766e
 [79e6ef0d]: https://github.com/G-Rath/audit-app/commit/79e6ef0d

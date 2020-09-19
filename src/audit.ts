@@ -97,7 +97,7 @@ const collectYarnAuditResults: AuditResultsCollector = async stdout => {
       }, reject)
     );
 
-    stdout.on('close', () => resolve(results));
+    stdout.on('end', () => resolve(results));
   });
 };
 
@@ -113,7 +113,7 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
     );
 
     stdout.on(
-      'close',
+      'end',
       tryOrCall(() => {
         if (json.trim().startsWith('ERROR')) {
           console.log(json);

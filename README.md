@@ -180,7 +180,7 @@ If you're using a json config, you can use `jq` to convert the output into a
 valid JSON array that you can paste straight into your config:
 
 ```shell script
-audit-app --output paths | grep '>@commitlint/load> | jq -R '[inputs]'
+audit-app --output paths | grep '>@commitlint/load>' | jq -nR '[inputs]'
 ```
 
 You can do this in PowerShell like so:
@@ -245,8 +245,8 @@ audit-app \
   --ignore '1213|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop'
 ```
 
-However, we recommend using a `.auditapprc.json` file to make it easier to track
-and update the list of ignored vulnerabilities:
+However, we recommend using an `.auditapprc.json` file to make it easier to
+track and update the list of ignored vulnerabilities:
 
 ```json
 {
@@ -332,6 +332,6 @@ creating a bottleneck for your application, or a dependency that was excessively
 large, you should consider replacing a dependency if it's making your app less
 secure.
 
-The `paths` output format (detailed below) can be useful in updating your
+The `paths` output format (detailed above) can be useful in updating your
 ignores list by providing a list of all the current vulnerabilities in your apps
 dependency tree that can be copied & pasted.

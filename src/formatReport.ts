@@ -194,10 +194,11 @@ const buildReportSummary = (report: AuditReport): string[] => {
       severities,
       vulnerable,
       ignored
-    }
+    },
+    missing: { length: missing }
   } = report;
 
-  return [
+  const lines: string[][] = [
     [
       '', // leading space
       `found ${wordWithCount(
@@ -207,8 +208,11 @@ const buildReportSummary = (report: AuditReport): string[] => {
       )}`,
       `(including ${ignored.total} ignored)`,
       `across ${wordWithCount(totalDependencies, 'packages')}`
-    ],
-    vulnerable.total && [
+    ]
+  ];
+
+  if (vulnerable.total) {
+    lines.push([
       '\t  \\:',
       Severities.filter(severity => vulnerable[severity] > 0)
         .map(
@@ -216,10 +220,20 @@ const buildReportSummary = (report: AuditReport): string[] => {
             `${vulnerable[severity]} ${severityColors[severity](severity)}`
         )
         .join(', ')
-    ]
-  ]
-    .filter(Array.isArray)
-    .map(arr => arr.join(' '));
+    ]);
+  }
+
+  if (missing) {
+    lines.push(
+      [''],
+      [
+        '', // leading space
+        `missing ${missing} vulnerabilities that were expected to have to ignored`
+      ]
+    );
+  }
+
+  return lines.map(arr => arr.join(' '));
 };
 
 const formatters: Record<SupportedReportFormat, ReportFormatter> = {

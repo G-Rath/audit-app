@@ -101,6 +101,27 @@ describe('formatReport', () => {
       });
     });
 
+    describe('when there are missing vulnerabilities', () => {
+      it('includes them in the summary', () => {
+        const summary = formatReportAndStripAnsi('summary', {
+          missing: ['1|package', '2|package', '3|package']
+        });
+
+        expect(summary).toMatch(/missing 3 vulnerabilities/iu);
+      });
+    });
+
+    describe('when there are no missing vulnerabilities', () => {
+      it('does not show a second line', () => {
+        const summary = formatReport('summary', {
+          ...emptyReport,
+          vulnerable: []
+        });
+
+        expect(summary).not.toContain('\n');
+      });
+    });
+
     describe('when there is only one vulnerability', () => {
       it('uses the singular word', () => {
         const summary = formatReportAndStripAnsi('summary', {

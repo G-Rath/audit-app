@@ -12,6 +12,14 @@
     "auditer",
     "app"
   ],
+  "homepage": "https://github.com/G-Rath/audit-app#readme",
+  "bugs": {
+    "url": "https://github.com/G-Rath/audit-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/G-Rath/audit-app.git"
+  },
   "license": "ISC",
   "author": "Gareth Jones",
   "main": "lib/index.js",

@@ -49,29 +49,29 @@ const prettifyTables = (tables: Array<string | string[]> | string): string =>
 
 describe('formatReport', () => {
   describe('when the format is "summary"', () => {
-    describe('when there are advisories', () => {
-      it('reports how many vulnerabilities were found', () => {
-        const summary = formatReportAndStripAnsi('summary', {
-          statistics: {
-            ...emptyStatistics,
-            severities: { ...zeroedSeverityCountsWithTotal, total: 3, low: 3 }
-          }
-        });
-
-        expect(summary).toMatch(/found 3 vulnerabilities/iu);
+    it('reports how many vulnerabilities were found', () => {
+      const summary = formatReportAndStripAnsi('summary', {
+        statistics: {
+          ...emptyStatistics,
+          severities: { ...zeroedSeverityCountsWithTotal, total: 3, low: 3 }
+        }
       });
 
-      it('includes how many vulnerabilities were ignored', () => {
-        const summary = formatReportAndStripAnsi('summary', {
-          statistics: {
-            ...emptyStatistics,
-            ignored: { ...zeroedSeverityCountsWithTotal, total: 2 }
-          }
-        });
+      expect(summary).toMatch(/found 3 vulnerabilities/iu);
+    });
 
-        expect(summary).toMatch(/\(including 2 ignored\)/iu);
+    it('includes how many vulnerabilities were ignored', () => {
+      const summary = formatReportAndStripAnsi('summary', {
+        statistics: {
+          ...emptyStatistics,
+          ignored: { ...zeroedSeverityCountsWithTotal, total: 2 }
+        }
       });
 
+      expect(summary).toMatch(/\(including 2 ignored\)/iu);
+    });
+
+    describe('when there are vulnerable vulnerabilities', () => {
       it('gives a breakdown of the severities', () => {
         const summary = formatReportAndStripAnsi('summary', {
           statistics: {
@@ -88,37 +88,29 @@ describe('formatReport', () => {
         expect(summary).toMatch('2 low');
         expect(summary).toMatch('1 high');
       });
+    });
 
-      describe('when there are no vulnerabilities', () => {
-        it('does not show a second line', () => {
-          const summary = formatReport('summary', {
-            ...emptyReport,
-            vulnerable: []
-          });
-
-          expect(summary).not.toContain('\n');
+    describe('when there are no vulnerable vulnerabilities', () => {
+      it('does not show a second line', () => {
+        const summary = formatReport('summary', {
+          ...emptyReport,
+          vulnerable: []
         });
-      });
 
-      describe('when there is only one vulnerability', () => {
-        it('uses the singular word', () => {
-          const summary = formatReportAndStripAnsi('summary', {
-            statistics: {
-              ...emptyStatistics,
-              severities: { ...zeroedSeverityCountsWithTotal, total: 1 }
-            }
-          });
-
-          expect(summary).toMatch(/found 1 vulnerability/iu);
-        });
+        expect(summary).not.toContain('\n');
       });
     });
 
-    describe('when there are no advisories', () => {
-      it('just prints the summary', () => {
-        expect(formatReportAndStripAnsi('summary', {})).toMatchInlineSnapshot(
-          `" found 0 vulnerabilities (including 0 ignored) across \\"some\\" packages"`
-        );
+    describe('when there is only one vulnerability', () => {
+      it('uses the singular word', () => {
+        const summary = formatReportAndStripAnsi('summary', {
+          statistics: {
+            ...emptyStatistics,
+            severities: { ...zeroedSeverityCountsWithTotal, total: 1 }
+          }
+        });
+
+        expect(summary).toMatch(/found 1 vulnerability/iu);
       });
     });
 

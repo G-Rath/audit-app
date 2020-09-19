@@ -14,6 +14,24 @@ export type SupportedReportFormat = typeof SupportedReportFormats[number];
 
 type ReportFormatter = (report: AuditReport) => string;
 
+const PluralToSingularMap = {
+  vulnerabilities: 'vulnerability',
+  packages: 'package'
+} as const;
+
+type PluralizableWord = keyof typeof PluralToSingularMap;
+
+const wordWithCount = (
+  count: number | string,
+  word: PluralizableWord,
+  countColor?: chalk.ChalkFunction
+) => {
+  const countString = countColor?.(count) ?? count;
+  const wordString = count === 1 ? PluralToSingularMap[word] : word;
+
+  return `${countString} ${wordString}`;
+};
+
 const countStr = (str: string): number => stripAnsi(str).length;
 const pad = (str: string): string => ` ${str.trim()} `;
 const wrap = (str: string, width: number): string[] => {
@@ -172,7 +190,7 @@ const buildReportTables = (report: AuditReport): string[] =>
 const buildReportSummary = (report: AuditReport): string[] => {
   const {
     statistics: {
-      dependencies, //
+      dependencies: { totalDependencies = '"some"' },
       severities,
       vulnerable,
       ignored
@@ -182,11 +200,13 @@ const buildReportSummary = (report: AuditReport): string[] => {
   return [
     [
       '', // leading space
-      `found ${severityColors[getHighestSeverity(severities)](
-        severities.total
-      )} vulnerabilities`,
+      `found ${wordWithCount(
+        severities.total,
+        'vulnerabilities',
+        severityColors[getHighestSeverity(severities)]
+      )}`,
       `(including ${ignored.total} ignored)`,
-      `across ${dependencies.totalDependencies ?? '"some"'} packages`
+      `across ${wordWithCount(totalDependencies, 'packages')}`
     ],
     vulnerable.total && [
       '\t  \\:',

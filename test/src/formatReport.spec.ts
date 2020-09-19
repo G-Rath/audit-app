@@ -99,6 +99,19 @@ describe('formatReport', () => {
           expect(summary).not.toContain('\n');
         });
       });
+
+      describe('when there is only one vulnerability', () => {
+        it('uses the singular word', () => {
+          const summary = formatReportAndStripAnsi('summary', {
+            statistics: {
+              ...emptyStatistics,
+              severities: { ...zeroedSeverityCountsWithTotal, total: 1 }
+            }
+          });
+
+          expect(summary).toMatch(/found 1 vulnerability/iu);
+        });
+      });
     });
 
     describe('when there are no advisories', () => {
@@ -121,6 +134,19 @@ describe('formatReport', () => {
         ).toMatchInlineSnapshot(
           `" found 0 vulnerabilities (including 0 ignored) across 5 packages"`
         );
+      });
+
+      describe('when there is only one dependency', () => {
+        it('uses the singular word', () => {
+          expect(
+            formatReportAndStripAnsi('summary', {
+              statistics: {
+                ...emptyStatistics,
+                dependencies: { totalDependencies: 1 }
+              }
+            })
+          ).toMatch(/across 1 package/iu);
+        });
       });
     });
   });

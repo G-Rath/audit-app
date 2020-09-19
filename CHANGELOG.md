@@ -1,4 +1,11 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.3.1...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.0...HEAD) (YYYY-MM-DD)
+
+# [0.4.0](https://github.com/G-Rath/audit-app/compare/v0.3.1...v0.4.0) (2020-09-19)
+
+### Features
+
+- exit with error code if report includes missing vulnerabilities ([9a143e24][])
+- mention any missing ignored vulnerabilities in summary ([15e9398b][])
 
 # [0.3.1](https://github.com/G-Rath/audit-app/compare/v0.3.0...v0.3.1) (2020-09-19)
 
@@ -34,6 +41,8 @@
 
 Initial Release 🎉
 
+[9a143e24]: https://github.com/G-Rath/audit-app/commit/9a143e24
+[15e9398b]: https://github.com/G-Rath/audit-app/commit/15e9398b
 [3dcd1f6d]: https://github.com/G-Rath/audit-app/commit/3dcd1f6d
 [7f3c0c9c]: https://github.com/G-Rath/audit-app/commit/7f3c0c9c
 [bfda8ade]: https://github.com/G-Rath/audit-app/commit/bfda8ade

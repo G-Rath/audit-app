@@ -75,6 +75,17 @@ describe('auditApp', () => {
 
       expect(process.exitCode).toBe(0);
     });
+
+    describe('when there are ignored vulnerable paths', () => {
+      it('sets the exit code to 1', async () => {
+        await auditApp({
+          ...emptyOptions,
+          ignore: ['1500|one', '1500|two', '1234|three']
+        });
+
+        expect(process.exitCode).toBe(1);
+      });
+    });
   });
 
   it('formats the report based on the desired output', async () => {

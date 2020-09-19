@@ -200,7 +200,7 @@ describe('formatReport', () => {
             advisories: {
               '1234': buildAdvisory({
                 findings: [{ version: '10.1.0', paths: ['one'] }],
-                title: `The advisory with a very l${'o'.repeat(50)}ng name`,
+                title: `The advisory with a very l${'o'.repeat(55)}ng name`,
                 patched_versions: `>=1.0.${'0'.repeat(50)} < 1.5.0`,
                 id: 1234,
                 severity: 'high'
@@ -213,7 +213,7 @@ describe('formatReport', () => {
             "
             ┌────────────┬────────────────────────────────────────────────────────────────────┐
             │ high       │ The advisory with a very                                           │
-            │            │ loooooooooooooooooooooooooooooooooooooooooooooooooong name         │
+            │            │ looooooooooooooooooooooooooooooooooooooooooooooooooooooong name    │
             │            │ (#1234)                                                            │
             ├────────────┼────────────────────────────────────────────────────────────────────┤
             │ Package    │ yargs-parser v10.1.0                                               │

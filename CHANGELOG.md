@@ -1,4 +1,10 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.0...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.1...HEAD) (YYYY-MM-DD)
+
+# [0.4.1](https://github.com/G-Rath/audit-app/compare/v0.4.0...v0.4.1) (2020-09-20)
+
+### Bug fixes
+
+- listen for `end` event instead of `close` to work on Node <14 ([90ae6214][])
 
 # [0.4.0](https://github.com/G-Rath/audit-app/compare/v0.3.1...v0.4.0) (2020-09-19)
 
@@ -41,6 +47,7 @@
 
 Initial Release 🎉
 
+[90ae6214]: https://github.com/G-Rath/audit-app/commit/90ae6214
 [9a143e24]: https://github.com/G-Rath/audit-app/commit/9a143e24
 [15e9398b]: https://github.com/G-Rath/audit-app/commit/15e9398b
 [3dcd1f6d]: https://github.com/G-Rath/audit-app/commit/3dcd1f6d

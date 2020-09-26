@@ -49,12 +49,12 @@ jobs:
       - run: npm run typecheck
 
   test:
-    name: Test on ${{ matrix.os }} using Node.js n${{ matrix.node }}
+    name: Test on ${{ matrix.os }} using Node.js v${{ matrix.node-version }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        node: [10.x, 12.x, 14.x]
+        node-version: [10.x, 12.x, 14.x]
     runs-on: ${{ matrix.os }}
 
     steps:

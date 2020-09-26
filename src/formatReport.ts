@@ -131,19 +131,21 @@ const buildTable = (
   return warpInTopAndBottomBorders(
     maxLabelWidth,
     maxValueWidth,
-    contents.flatMap(([label, value], index) => {
+    contents.reduce<string[]>((acc, [label, value], index) => {
       const lines = wrap(pad(value), maxValueWidth);
 
-      return [
-        index && rowSpacer,
-        ...lines.map((v, i) =>
-          createRow(
-            [maxLabelWidth, i === 0 ? pad(label) : ''],
-            [maxValueWidth, pad(v)]
-          ).join('')
-        )
-      ].filter((s): s is string => typeof s === 'string');
-    })
+      return acc.concat(
+        [
+          index && rowSpacer,
+          ...lines.map((v, i) =>
+            createRow(
+              [maxLabelWidth, i === 0 ? pad(label) : ''],
+              [maxValueWidth, pad(v)]
+            ).join('')
+          )
+        ].filter((s): s is string => typeof s === 'string')
+      );
+    }, [])
   );
 };
 

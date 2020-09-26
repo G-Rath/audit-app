@@ -69,10 +69,16 @@ export const generateReport = (
     ignored,
     missing
   ] = Object.entries(results.advisories)
-    .flatMap(([, advisory]) =>
-      advisory.findings.flatMap(finding =>
-        finding.paths.map(path => `${advisory.id}|${path}`)
-      )
+    .reduce<string[]>(
+      (paths, [, advisory]) =>
+        paths.concat(
+          advisory.findings.reduce<string[]>(
+            (acc, finding) =>
+              acc.concat(finding.paths.map(path => `${advisory.id}|${path}`)),
+            []
+          )
+        ),
+      []
     )
     .reduce<[string[], string[], string[]]>(
       (sorts, path) => {

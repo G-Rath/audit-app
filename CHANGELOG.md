@@ -1,4 +1,10 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.1...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.2...HEAD) (YYYY-MM-DD)
+
+# [0.4.2](https://github.com/G-Rath/audit-app/compare/v0.4.1...v0.4.2) (2020-09-26)
+
+### Bug fixes
+
+- replace use of `flatMap` to support lower versions of node ([86083810][])
 
 # [0.4.1](https://github.com/G-Rath/audit-app/compare/v0.4.0...v0.4.1) (2020-09-20)
 
@@ -47,6 +53,7 @@
 
 Initial Release 🎉
 
+[86083810]: https://github.com/G-Rath/audit-app/commit/86083810
 [90ae6214]: https://github.com/G-Rath/audit-app/commit/90ae6214
 [9a143e24]: https://github.com/G-Rath/audit-app/commit/9a143e24
 [15e9398b]: https://github.com/G-Rath/audit-app/commit/15e9398b

@@ -1,7 +1,7 @@
-/** @typedef {import('ts-jest')} */
+import { Config } from '@jest/types';
+import 'ts-jest';
 
-/** @type {import('@jest/types').Config.InitialOptions} */
-const config = {
+const config: Config.InitialOptions = {
   globals: {
     'ts-jest': {
       isolatedModules: true
@@ -20,4 +20,4 @@ const config = {
   }
 };
 
-module.exports = config;
+export default config;

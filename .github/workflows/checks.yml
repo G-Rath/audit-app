@@ -101,3 +101,16 @@ jobs:
 
       - run: node lib/cli.js --version
       - run: node lib/cli.js
+
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: 12.x
+
+      - run: |
+          npx ajv-cli compile \
+            --strict-types=true --strict-tuples=true \
+            -s config.schema.json

@@ -1,4 +1,10 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.2...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.3...HEAD) (YYYY-MM-DD)
+
+# [0.4.3](https://github.com/G-Rath/audit-app/compare/v0.4.2...v0.4.3) (2021-01-06)
+
+### Bug fixes
+
+- update schema to be valid in strict mode ([d5c5fd0e][])
 
 # [0.4.2](https://github.com/G-Rath/audit-app/compare/v0.4.1...v0.4.2) (2020-09-26)
 
@@ -53,6 +59,7 @@
 
 Initial Release 🎉
 
+[d5c5fd0e]: https://github.com/G-Rath/audit-app/commit/d5c5fd0e
 [86083810]: https://github.com/G-Rath/audit-app/commit/86083810
 [90ae6214]: https://github.com/G-Rath/audit-app/commit/90ae6214
 [9a143e24]: https://github.com/G-Rath/audit-app/commit/9a143e24

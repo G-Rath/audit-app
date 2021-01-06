@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
   "title": "JSONConfig",
+  "type": "object",
   "definitions": {
     "SupportedPackageManagerOrAuto": {
       "enum": ["auto", "npm", "yarn", "pnpm"]
@@ -20,7 +21,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^\\d+\\|((?:@[a-z\\d-*~][a-z\\d-*._~]*/)?[a-z\\d-~][a-z\\d-._~]*>)+((?:@[a-z\\d-*~][a-z\\d-*._~]*/)?[a-z\\d-~][a-z\\d-._~]*)$"
+        "pattern": "^\\d+\\|((?:@[a-z\\d*~-][a-z\\d*._~-]*/)?[a-z\\d~-][a-z\\d._~-]*>)+((?:@[a-z\\d*~-][a-z\\d*._~-]*/)?[a-z\\d~-][a-z\\d._~-]*)$"
       }
     }
   },

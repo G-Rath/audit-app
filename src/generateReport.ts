@@ -1,9 +1,9 @@
 import { AuditResults } from './audit';
-import { Advisories, SeverityCountsWithTotal, Statistics } from './types';
+import { Finding, SeverityCountsWithTotal, Statistics } from './types';
 
 export interface AuditReport {
   statistics: Statistics;
-  advisories: Advisories;
+  findings: Record<string, Finding>;
   // "advisory|path" that are in the results, and are vulnerable
   vulnerable: readonly string[];
   // "advisory|path" that are in the results, but ignored
@@ -32,20 +32,13 @@ const generateStatistics = (
     ignored: { ...severityCountsWithTotal }
   };
 
-  Object.values(results.advisories).forEach(({ id, findings, severity }) => {
-    const { vulnerable, ignored } = findings.reduce(
-      (sums, { paths }) => {
-        const { length: count } = paths.filter(path =>
-          ignores.includes(`${id}|${path}`)
-        );
-
-        sums.vulnerable += paths.length - count;
-        sums.ignored += count;
-
-        return sums;
-      },
-      { vulnerable: 0, ignored: 0 }
+  Object.values(results.findings).forEach(({ id, paths, severity }) => {
+    const { length: count } = paths.filter(path =>
+      ignores.includes(`${id}|${path}`)
     );
+
+    const vulnerable = paths.length - count;
+    const ignored = count;
 
     statistics.severities[severity] += ignored + vulnerable;
     statistics.severities.total += ignored + vulnerable;
@@ -68,16 +61,10 @@ export const generateReport = (
     vulnerable, //
     ignored,
     missing
-  ] = Object.entries(results.advisories)
+  ] = Object.values(results.findings)
     .reduce<string[]>(
-      (paths, [, advisory]) =>
-        paths.concat(
-          advisory.findings.reduce<string[]>(
-            (acc, finding) =>
-              acc.concat(finding.paths.map(path => `${advisory.id}|${path}`)),
-            []
-          )
-        ),
+      (allPaths, { id, paths }) =>
+        allPaths.concat(paths.map(path => `${id}|${path}`)),
       []
     )
     .reduce<[string[], string[], string[]]>(
@@ -99,7 +86,7 @@ export const generateReport = (
     );
 
   return {
-    advisories: results.advisories,
+    findings: results.findings,
     statistics: generateStatistics(ignores, results),
     vulnerable,
     ignored,

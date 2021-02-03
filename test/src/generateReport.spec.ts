@@ -1,7 +1,7 @@
 import { AuditResults } from '../../src/audit';
 import { AuditReport, generateReport } from '../../src/generateReport';
 import { SeverityCountsWithTotal } from '../../src/types';
-import { buildAdvisory } from '../buildAdvisory';
+import { buildFinding } from '../buildFinding';
 
 const zeroedSeverityCountsWithTotal: SeverityCountsWithTotal = {
   total: 0,
@@ -15,17 +15,14 @@ const zeroedSeverityCountsWithTotal: SeverityCountsWithTotal = {
 describe('generateReport', () => {
   const AnyStatistics = expect.any(Object) as AuditReport['statistics'];
 
-  const advisories: AuditResults['advisories'] = {
-    '1234': buildAdvisory({
-      findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
+  const findings: AuditResults['findings'] = {
+    '1234': buildFinding({
+      paths: ['one', 'two'],
       id: 1234,
       severity: 'high'
     }),
-    '1500': buildAdvisory({
-      findings: [
-        { version: '10.1.0', paths: ['three'] },
-        { version: '10.1.0', paths: ['four', 'five'] }
-      ],
+    '1500': buildFinding({
+      paths: ['three', 'four', 'five'],
       id: 1500,
       severity: 'low'
     })
@@ -33,7 +30,7 @@ describe('generateReport', () => {
 
   const results: AuditResults = {
     dependencyStatistics: {},
-    advisories
+    findings
   };
 
   it('collects the paths from the findings of each advisory', () => {
@@ -41,7 +38,7 @@ describe('generateReport', () => {
 
     expect(report).toStrictEqual<AuditReport>({
       statistics: AnyStatistics,
-      advisories,
+      findings,
       vulnerable: [
         '1234|one',
         '1234|two',
@@ -88,7 +85,7 @@ describe('generateReport', () => {
 
       expect(report).toStrictEqual<AuditReport>({
         statistics: AnyStatistics,
-        advisories,
+        findings,
         vulnerable: ['1234|two', '1500|three', '1500|four'],
         ignored: ['1234|one', '1500|five'],
         missing: []
@@ -143,7 +140,7 @@ describe('generateReport', () => {
 
         expect(report).toStrictEqual<AuditReport>({
           statistics: AnyStatistics,
-          advisories,
+          findings,
           vulnerable: ['1234|two', '1500|three', '1500|four'],
           ignored: ['1234|one', '1500|five'],
           missing: ['1500|six']
@@ -152,11 +149,11 @@ describe('generateReport', () => {
     });
   });
 
-  describe('when there are no advisories', () => {
+  describe('when there are no findings', () => {
     it('generates an empty report', () => {
       const report = generateReport([], {
         dependencyStatistics: {},
-        advisories: {}
+        findings: {}
       });
 
       expect(report).toStrictEqual<AuditReport>({
@@ -166,7 +163,7 @@ describe('generateReport', () => {
           severities: zeroedSeverityCountsWithTotal,
           ignored: zeroedSeverityCountsWithTotal
         },
-        advisories: {},
+        findings: {},
         vulnerable: [],
         ignored: [],
         missing: []

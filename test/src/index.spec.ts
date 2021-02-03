@@ -2,7 +2,7 @@ import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
 import { formatReport } from '../../src/formatReport';
-import { buildAdvisory } from '../buildAdvisory';
+import { buildFinding } from '../buildFinding';
 
 jest.mock('../../src/audit');
 jest.mock('../../src/formatReport');
@@ -24,7 +24,7 @@ const emptyOptions: Options = {
 describe('auditApp', () => {
   beforeEach(() => {
     mockedAudit.mockResolvedValue({
-      advisories: {},
+      findings: {},
       dependencyStatistics: {}
     });
 
@@ -35,14 +35,14 @@ describe('auditApp', () => {
   describe('when there are vulnerabilities', () => {
     beforeEach(() => {
       mockedAudit.mockResolvedValue({
-        advisories: {
-          '1500': buildAdvisory({
-            findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
+        findings: {
+          '1500': buildFinding({
+            paths: ['one', 'two'],
             id: 1500,
             severity: 'low'
           }),
-          '1234': buildAdvisory({
-            findings: [{ version: '10.1.0', paths: ['three'] }],
+          '1234': buildFinding({
+            paths: ['three'],
             id: 1234,
             severity: 'high'
           })

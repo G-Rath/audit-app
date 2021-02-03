@@ -5,6 +5,19 @@ outputting the results in a form that makes it easy to triage advisories, and
 providing support for ignoring advisories to keep your CI passing without having
 to sacrifice security.
 
+# NPM 7 Support
+
+There is initial support for `npm@7`, but it has meant the audit report output
+has been changed significantly due to the difference in information provided in
+the new version.
+
+In particular, it's now no longer possible to calculate the full dependency path
+to a vulnerability without making additional calls to `npm`. As such, currently
+the paths used for ignoring vulnerabilities with `npm@7` are made up solely of
+the advisory number followed by the name of the package the advisory is for.
+
+This may be improved in the future.
+
 # Getting Started
 
 To run `audit-app` as a once-off against an app, you can use `npx`:
@@ -153,7 +166,7 @@ has a few different clipboards, such as `xclip`, `gpm`, and `screen`:
 
 ```shell script
 audit-app --output paths | pbcopy # on OSX
-audit-app --output paths | clip # on Windows (including WSL)
+audit-app --output paths | clip   # on Windows (including WSL)
 ```
 
 Note that for Windows, `clip` works in both PowerShell & Windows System for

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
 import { AuditReport } from './generateReport';
-import { Advisory, Severity, SeverityCounts } from './types';
+import { Finding, Severity, SeverityCounts } from './types';
 
 export const SupportedReportFormats = [
   'summary',
@@ -159,20 +159,15 @@ const severityColors: Record<Severity, chalk.ChalkFunction> = {
 
 const Severities = Object.keys(severityColors) as Severity[];
 
-const buildAdvisoryTable = (advisory: Advisory): string =>
+const buildFindingsTable = (finding: Finding): string =>
   buildTable([
     [
-      severityColors[advisory.severity](advisory.severity),
-      chalk.whiteBright(`${advisory.title} (#${advisory.id})`)
+      severityColors[finding.severity](finding.severity),
+      chalk.whiteBright(`${finding.title} (#${finding.id})`)
     ],
-    [
-      'Package',
-      `${advisory.module_name} ${Array.from(
-        new Set(advisory.findings.map(finding => `v${finding.version}`))
-      ).join(', ')}`
-    ],
-    ['Patched in', advisory.patched_versions],
-    ['More info', advisory.url]
+    ['Package', finding.name],
+    ['Vulnerable range', finding.range],
+    ['More info', finding.url]
   ]).join('\n');
 
 const getHighestSeverity = (severities: SeverityCounts): Severity =>
@@ -180,14 +175,12 @@ const getHighestSeverity = (severities: SeverityCounts): Severity =>
     severity => severities[severity] > 0
   ) ?? 'info';
 
-const compareAdvisories = (a: Advisory, b: Advisory): number =>
-  a.module_name.localeCompare(b.module_name) ||
+const compareFindings = (a: Finding, b: Finding): number =>
+  a.name.localeCompare(b.name) ||
   Severities.indexOf(b.severity) - Severities.indexOf(a.severity);
 
 const buildReportTables = (report: AuditReport): string[] =>
-  Object.values(report.advisories)
-    .sort(compareAdvisories)
-    .map(buildAdvisoryTable);
+  Object.values(report.findings).sort(compareFindings).map(buildFindingsTable);
 
 const buildReportSummary = (report: AuditReport): string[] => {
   const {

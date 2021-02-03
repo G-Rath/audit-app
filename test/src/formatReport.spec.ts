@@ -2,7 +2,7 @@ import stripAnsi from 'strip-ansi';
 import { SupportedReportFormat, formatReport } from '../../src/formatReport';
 import { AuditReport } from '../../src/generateReport';
 import { SeverityCountsWithTotal } from '../../src/types';
-import { buildAdvisory } from '../buildAdvisory';
+import { buildFinding } from '../buildFinding';
 
 const zeroedSeverityCountsWithTotal: SeverityCountsWithTotal = {
   total: 0,
@@ -22,7 +22,7 @@ const emptyStatistics = {
 
 const emptyReport: AuditReport = {
   statistics: emptyStatistics,
-  advisories: {},
+  findings: {},
   vulnerable: [],
   ignored: [],
   missing: []
@@ -169,12 +169,11 @@ describe('formatReport', () => {
       describe('the tables', () => {
         it('prints a table with information on the advisory', () => {
           const tables = formatReportAndGetTables({
-            advisories: {
-              '1234': buildAdvisory({
-                findings: [{ version: '10.1.0', paths: ['one'] }],
-                title: 'My Second Advisory',
+            findings: {
+              '1234': buildFinding({
                 id: 1234,
-                severity: 'high'
+                paths: ['one'],
+                title: 'My Second Advisory'
               })
             },
             vulnerable: ['one']
@@ -182,28 +181,27 @@ describe('formatReport', () => {
 
           expect(prettifyTables(tables)).toMatchInlineSnapshot(`
             "
-            ┌────────────┬────────────────────────────────────────────────────────────────────┐
-            │ high       │ My Second Advisory (#1234)                                         │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ Package    │ yargs-parser v10.1.0                                               │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ Patched in │                                                                    │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ More info  │ https://npmjs.com/advisories/1500                                  │
-            └────────────┴────────────────────────────────────────────────────────────────────┘
+            ┌──────────────────┬──────────────────────────────────────────────────────────────┐
+            │ low              │ My Second Advisory (#1234)                                   │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Package          │ yargs-parser                                                 │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Vulnerable range │ <13.1.2 || >=14.0.0 <15.0.1 || >=16.0.0 <18.1.2              │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ More info        │ https://npmjs.com/advisories/1234                            │
+            └──────────────────┴──────────────────────────────────────────────────────────────┘
             "
           `);
         });
 
         it('wraps the value columns to a fixed width', () => {
           const tables = formatReportAndGetTables({
-            advisories: {
-              '1234': buildAdvisory({
-                findings: [{ version: '10.1.0', paths: ['one'] }],
-                title: `The advisory with a very l${'o'.repeat(55)}ng name`,
-                patched_versions: `>=1.0.${'0'.repeat(50)} < 1.5.0`,
+            findings: {
+              '1234': buildFinding({
                 id: 1234,
-                severity: 'high'
+                paths: ['one'],
+                range: `>=1.0.${'0'.repeat(50)} < 1.5.0`,
+                title: `The advisory with a very l${'o'.repeat(55)}ng name`
               })
             },
             vulnerable: ['one']
@@ -211,17 +209,18 @@ describe('formatReport', () => {
 
           expect(prettifyTables(tables)).toMatchInlineSnapshot(`
             "
-            ┌────────────┬────────────────────────────────────────────────────────────────────┐
-            │ high       │ The advisory with a very                                           │
-            │            │ looooooooooooooooooooooooooooooooooooooooooooooooooooooong name    │
-            │            │ (#1234)                                                            │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ Package    │ yargs-parser v10.1.0                                               │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ Patched in │ >=1.0.00000000000000000000000000000000000000000000000000 < 1.5.0   │
-            ├────────────┼────────────────────────────────────────────────────────────────────┤
-            │ More info  │ https://npmjs.com/advisories/1500                                  │
-            └────────────┴────────────────────────────────────────────────────────────────────┘
+            ┌──────────────────┬──────────────────────────────────────────────────────────────┐
+            │ low              │ The advisory with a very                                     │
+            │                  │ looooooooooooooooooooooooooooooooooooooooooooooooooooooong   │
+            │                  │ name (#1234)                                                 │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Package          │ yargs-parser                                                 │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Vulnerable range │ >=1.0.00000000000000000000000000000000000000000000000000 <   │
+            │                  │ 1.5.0                                                        │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ More info        │ https://npmjs.com/advisories/1234                            │
+            └──────────────────┴──────────────────────────────────────────────────────────────┘
             "
           `);
         });
@@ -229,18 +228,18 @@ describe('formatReport', () => {
         describe('when an advisory has multiple findings', () => {
           it('prints one table per advisory', () => {
             const tables = formatReportAndGetTables({
-              advisories: {
-                '1500': buildAdvisory({
-                  findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
-                  title: 'My First Advisory',
+              findings: {
+                '1500': buildFinding({
                   id: 1500,
-                  severity: 'low'
+                  paths: ['one', 'two'],
+                  severity: 'low',
+                  title: 'My First Advisory'
                 }),
-                '1234': buildAdvisory({
-                  findings: [{ version: '10.1.0', paths: ['three', 'four'] }],
-                  title: 'My Second Advisory',
+                '1234': buildFinding({
                   id: 1234,
-                  severity: 'high'
+                  paths: ['three', 'four'],
+                  severity: 'high',
+                  title: 'My Second Advisory'
                 })
               },
               vulnerable: ['one', 'two', 'three', 'four']
@@ -251,12 +250,12 @@ describe('formatReport', () => {
           });
         });
 
-        it('sorts advisories by their module_name first', () => {
+        it('sorts advisories by their name first', () => {
           const tables = formatReportAndGetTables({
-            advisories: {
-              '1': buildAdvisory({ module_name: 'B', id: 1 }),
-              '2': buildAdvisory({ module_name: 'C', id: 2 }),
-              '3': buildAdvisory({ module_name: 'A', id: 3 })
+            findings: {
+              '1': buildFinding({ name: 'B', id: 1 }),
+              '2': buildFinding({ name: 'C', id: 2 }),
+              '3': buildFinding({ name: 'A', id: 3 })
             }
           });
 
@@ -269,9 +268,9 @@ describe('formatReport', () => {
           ).toMatchInlineSnapshot(`
             "
             ┌────────────┬────────────────────────────────────────────────────────────────────┐
-            │ Package    │ A v10.1.0, v9.0.2                                                  │
-            │ Package    │ B v10.1.0, v9.0.2                                                  │
-            │ Package    │ C v10.1.0, v9.0.2                                                  │
+            │ Package          │ A                                                            │
+            │ Package          │ B                                                            │
+            │ Package          │ C                                                            │
             └────────────┴────────────────────────────────────────────────────────────────────┘
             "
           `);
@@ -279,24 +278,24 @@ describe('formatReport', () => {
 
         it('sorts advisories by their severity second', () => {
           const tables = formatReportAndGetTables({
-            advisories: {
-              '1': buildAdvisory({
+            findings: {
+              '1': buildFinding({
                 title: 'My Advisory',
                 id: 1,
                 severity: 'high',
-                module_name: 'A'
+                name: 'A'
               }),
-              '2': buildAdvisory({
+              '2': buildFinding({
                 title: 'My Advisory',
                 id: 2,
                 severity: 'critical',
-                module_name: 'A'
+                name: 'A'
               }),
-              '3': buildAdvisory({
+              '3': buildFinding({
                 title: 'My Advisory',
                 id: 3,
                 severity: 'low',
-                module_name: 'A'
+                name: 'A'
               })
             }
           });
@@ -312,9 +311,9 @@ describe('formatReport', () => {
           ).toMatchInlineSnapshot(`
             "
             ┌────────────┬────────────────────────────────────────────────────────────────────┐
-            │ critical   │ My Advisory (#2)                                                   │
-            │ high       │ My Advisory (#1)                                                   │
-            │ low        │ My Advisory (#3)                                                   │
+            │ critical         │ My Advisory (#2)                                             │
+            │ high             │ My Advisory (#1)                                             │
+            │ low              │ My Advisory (#3)                                             │
             └────────────┴────────────────────────────────────────────────────────────────────┘
             "
           `);
@@ -323,14 +322,13 @@ describe('formatReport', () => {
 
       it('includes the summary', () => {
         const report: Partial<AuditReport> = {
-          advisories: {
-            '1500': buildAdvisory({
-              findings: [{ version: '10.1.0', paths: ['one', 'two'] }],
-              id: 1500,
+          findings: {
+            '1500': buildFinding({
+              paths: ['one', 'two'],
               severity: 'low'
             }),
-            '1234': buildAdvisory({
-              findings: [{ version: '10.1.0', paths: ['three'] }],
+            '1234': buildFinding({
+              paths: ['three'],
               id: 1234,
               severity: 'high'
             })
@@ -406,7 +404,7 @@ describe('formatReport', () => {
           ignored: ['2|a>b']
         })
       ).toMatchInlineSnapshot(
-        `"{\\"statistics\\":{\\"dependencies\\":{},\\"vulnerable\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"severities\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"ignored\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0}},\\"advisories\\":{},\\"vulnerable\\":[\\"1|a\\",\\"1|a>b\\",\\"2|c>b\\"],\\"ignored\\":[\\"2|a>b\\"],\\"missing\\":[]}"`
+        `"{\\"statistics\\":{\\"dependencies\\":{},\\"vulnerable\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"severities\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0},\\"ignored\\":{\\"total\\":0,\\"info\\":0,\\"low\\":0,\\"moderate\\":0,\\"high\\":0,\\"critical\\":0}},\\"findings\\":{},\\"vulnerable\\":[\\"1|a\\",\\"1|a>b\\",\\"2|c>b\\"],\\"ignored\\":[\\"2|a>b\\"],\\"missing\\":[]}"`
       );
     });
   });

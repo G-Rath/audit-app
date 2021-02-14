@@ -1,4 +1,17 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.4.3...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.0...HEAD) (YYYY-MM-DD)
+
+# [0.5.0](https://github.com/G-Rath/audit-app/compare/v0.4.3...v0.5.0) (2021-02-15)
+
+This version dramatically changes the audit report created by `audit-app` in
+order to support NPM 7.
+
+In addition to changing the JSON structure outputted by `--output json`, the
+format of ignore paths has also changed meaning any existing ignores will need
+to be updated.
+
+### Features
+
+- initial support for NPM 7 ([2e10def0][])
 
 # [0.4.3](https://github.com/G-Rath/audit-app/compare/v0.4.2...v0.4.3) (2021-01-06)
 
@@ -59,6 +72,7 @@
 
 Initial Release 🎉
 
+[2e10def0]: https://github.com/G-Rath/audit-app/commit/2e10def0
 [d5c5fd0e]: https://github.com/G-Rath/audit-app/commit/d5c5fd0e
 [86083810]: https://github.com/G-Rath/audit-app/commit/86083810
 [90ae6214]: https://github.com/G-Rath/audit-app/commit/90ae6214

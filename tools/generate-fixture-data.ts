@@ -2,13 +2,14 @@
 
 /* eslint-disable node/no-sync */
 
-import { spawn } from 'child_process';
+import { strict as assert } from 'assert';
+import { spawn, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import {
-  SupportedPackageManager,
-  SupportedPackageManagers
-} from '../src/audit';
+
+const SupportedPackageManagers = ['npm@6', 'npm@7', 'yarn', 'pnpm'];
+
+type SupportedPackageManager = typeof SupportedPackageManagers[number];
 
 type AuditFixture = Record<SupportedPackageManager, string>;
 
@@ -21,8 +22,9 @@ const generateAuditOutput = async (
 ): Promise<string> =>
   new Promise<string>((resolve, reject) => {
     const proc = spawn(
-      packageManager,
+      'npx',
       [
+        packageManager,
         'audit',
         '--json',
         `--${packageManager === 'yarn' ? 'cwd' : 'prefix'}`,
@@ -58,6 +60,21 @@ const fixtures = fs
   .filter(dir => dir.isDirectory())
   .map(dir => dir.name);
 
+const getLocalNpmMajorVersion = (): string => {
+  const { stdout } = spawnSync('npm', ['--version'], { encoding: 'utf-8' });
+
+  const [npmMajorVersion] = stdout;
+
+  assert.ok(
+    ['7', '6'].includes(npmMajorVersion),
+    `${npmMajorVersion} is not a supported major npm version`
+  );
+
+  return npmMajorVersion;
+};
+
+const localNpmMajorVersion = getLocalNpmMajorVersion();
+
 /**
  * Replaces the `runId` property in the raw output from `npm audit --json` calls
  * with a hardcoded runId to reduce meaningless diffing.
@@ -74,15 +91,22 @@ const replaceRunId = (output: string): string =>
 
 Promise.all(
   fixtures.map(async fixture => {
-    fixturesJson[fixture] = {
-      npm: '',
-      pnpm: '',
-      yarn: ''
-    };
+    fixturesJson[fixture] = {};
+
+    // ensure properties are in the same order each time
+    SupportedPackageManagers.forEach(packageManager => {
+      fixturesJson[fixture][packageManager] = '';
+    });
 
     return Promise.all(
       SupportedPackageManagers.map(async packageManager =>
-        generateAuditOutput(path.join(pathToFixtures, fixture), packageManager)
+        generateAuditOutput(
+          path.join(pathToFixtures, fixture),
+          // avoid installing npm if we can help it, to make things faster
+          packageManager === `npm@${localNpmMajorVersion}`
+            ? 'npm'
+            : packageManager
+        )
           .then(output => {
             console.log(`${fixture}: generated ${packageManager} audit output`);
 

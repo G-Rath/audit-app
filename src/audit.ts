@@ -1,10 +1,13 @@
 import { spawn } from 'child_process';
 import ReadlineTransform from 'readline-transform';
 import {
-  Advisories,
-  Advisory,
   AuditMetadata,
   AuditOutput,
+  Finding,
+  Npm6Advisory,
+  Npm7Advisory,
+  Npm7AuditMetadata,
+  Npm7Vulnerability,
   Resolution,
   Statistics
 } from './types';
@@ -25,7 +28,7 @@ interface AuditAdvisoryLine {
 
 interface AuditAdvisoryData {
   resolution: Resolution;
-  advisory: Advisory;
+  advisory: Npm6Advisory;
 }
 
 interface AuditSummaryLine {
@@ -55,6 +58,15 @@ const extractDependencyStatistics = (
   return statistics;
 };
 
+const extractDependencyStatisticsFromNpm7 = (
+  metadata: Npm7AuditMetadata
+): DependencyStatistics => ({
+  dependencies: metadata.dependencies.prod,
+  devDependencies: metadata.dependencies.dev,
+  optionalDependencies: metadata.dependencies.optional,
+  totalDependencies: metadata.dependencies.total
+});
+
 const tryOrCall = <TParams extends unknown[]>(
   fn: (...args: TParams) => void,
   er: (error: Error) => void
@@ -67,14 +79,37 @@ const tryOrCall = <TParams extends unknown[]>(
 };
 
 export interface AuditResults {
-  advisories: Advisories;
+  findings: Record<string, Finding>;
   dependencyStatistics: DependencyStatistics;
 }
 
 type AuditResultsCollector = (stdout: ReadableStream) => Promise<AuditResults>;
 
+const npm7AdvisoryToFinding = (advisory: Npm7Advisory): Finding => ({
+  id: advisory.source,
+  name: advisory.name,
+  paths: [advisory.dependency],
+  range: advisory.range,
+  severity: advisory.severity,
+  title: advisory.title,
+  url: advisory.url
+});
+
+const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
+  id: advisory.id,
+  name: advisory.module_name,
+  paths: advisory.findings.reduce<string[]>(
+    (acc, finding) => acc.concat(finding.paths),
+    []
+  ),
+  range: advisory.vulnerable_versions,
+  severity: advisory.severity,
+  title: advisory.title,
+  url: advisory.url
+});
+
 const collectYarnAuditResults: AuditResultsCollector = async stdout => {
-  const results: AuditResults = { advisories: {}, dependencyStatistics: {} };
+  const results: AuditResults = { findings: {}, dependencyStatistics: {} };
 
   return new Promise<AuditResults>((resolve, reject) => {
     stdout.on('error', reject);
@@ -91,14 +126,27 @@ const collectYarnAuditResults: AuditResultsCollector = async stdout => {
         }
 
         if (parsedLine.type === 'auditAdvisory') {
-          results.advisories[parsedLine.data.advisory.id] =
-            parsedLine.data.advisory;
+          results.findings[
+            parsedLine.data.advisory.id.toString()
+          ] = npm6AdvisoryToFinding(parsedLine.data.advisory);
         }
       }, reject)
     );
 
     stdout.on('end', () => resolve(results));
   });
+};
+
+const toMapOfFindings = (findings: Finding[]): Record<string, Finding> => {
+  const theFindings: Record<string, Finding> = {};
+
+  findings.forEach(finding => (theFindings[finding.id.toString()] = finding));
+
+  return theFindings;
+};
+
+type Npm7VulnerabilityWithAdvisory = Omit<Npm7Vulnerability, 'via'> & {
+  via: [Npm7Advisory];
 };
 
 const collectNpmAuditResults: AuditResultsCollector = async stdout => {
@@ -131,8 +179,28 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
           throw new Error(errorMessage);
         }
 
+        if ('auditReportVersion' in auditOutput) {
+          resolve({
+            findings: toMapOfFindings(
+              Object.values(auditOutput.vulnerabilities)
+                .filter(
+                  (vul): vul is Npm7VulnerabilityWithAdvisory =>
+                    vul.via.length === 1 && typeof vul.via[0] === 'object'
+                )
+                .map(vul => npm7AdvisoryToFinding(vul.via[0]))
+            ),
+            dependencyStatistics: extractDependencyStatisticsFromNpm7(
+              auditOutput.metadata
+            )
+          });
+
+          return;
+        }
+
         resolve({
-          advisories: auditOutput.advisories,
+          findings: toMapOfFindings(
+            Object.values(auditOutput.advisories).map(npm6AdvisoryToFinding)
+          ),
           dependencyStatistics: extractDependencyStatistics(
             auditOutput.metadata
           )

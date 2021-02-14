@@ -3,13 +3,22 @@ export type Severity = 'info' | 'low' | 'moderate' | 'high' | 'critical';
 export type SeverityCounts = Record<Severity, number>;
 export type SeverityCountsWithTotal = Record<Severity | 'total', number>;
 
-export type Advisories = Record<string, Advisory>;
+export type Advisories = Record<string, Npm6Advisory>;
 
 interface DependencyStatistics {
   dependencies?: number;
   devDependencies?: number;
   optionalDependencies?: number;
   totalDependencies?: number;
+}
+
+interface DependencyCounts {
+  prod: number;
+  dev: number;
+  optional: number;
+  peer: number;
+  peerOptional: number;
+  total: number;
 }
 
 export interface Statistics {
@@ -19,13 +28,61 @@ export interface Statistics {
   ignored: SeverityCountsWithTotal;
 }
 
-export interface AuditOutput {
+export type AuditOutput = NpmAuditOutput | PnpmAuditOutput | YarnAuditOutput;
+
+export type NpmAuditOutput = Npm6AuditOutput | Npm7AuditOutput;
+export type PnpmAuditOutput = Npm6AuditOutput;
+export type YarnAuditOutput = Npm6AuditOutput;
+
+export interface Npm6AuditOutput {
   actions: Action[];
   advisories: Advisories;
   muted: unknown[];
   metadata: AuditMetadata;
   // npm only
   runId?: string;
+}
+
+export interface Finding {
+  id: number;
+  name: string;
+  paths: string[];
+  range: string;
+  severity: Severity;
+  title: string;
+  url: string;
+}
+
+export interface Npm7Vulnerability {
+  name: string;
+  via: Array<Npm7Advisory | string>;
+  effects: string[];
+  range: string;
+  nodes: string[];
+  fixAvailable: Fix | boolean;
+  severity: Severity;
+}
+
+export interface Npm7AuditOutput {
+  auditReportVersion: 2;
+  vulnerabilities: Record<string, Npm7Vulnerability>;
+  metadata: Npm7AuditMetadata;
+}
+
+export interface Npm7Advisory {
+  source: number;
+  name: string;
+  dependency: string;
+  title: string;
+  url: string;
+  severity: Severity;
+  range: string;
+}
+
+interface Fix {
+  name: string;
+  version: string;
+  isSemVerMajor: boolean;
 }
 
 interface Action {
@@ -45,7 +102,7 @@ export interface Resolution {
   bundled: boolean;
 }
 
-export interface Advisory {
+export interface Npm6Advisory {
   findings: AdvisoryFinding[];
   id: number;
   created: string;
@@ -87,4 +144,9 @@ interface AdvisoryMetadata {
 
 export interface AuditMetadata extends Required<DependencyStatistics> {
   vulnerabilities: SeverityCounts;
+}
+
+export interface Npm7AuditMetadata {
+  vulnerabilities: SeverityCountsWithTotal;
+  dependencies: DependencyCounts;
 }

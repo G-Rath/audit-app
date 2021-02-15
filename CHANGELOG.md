@@ -1,4 +1,10 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.0...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.1...HEAD) (YYYY-MM-DD)
+
+# [0.5.1](https://github.com/G-Rath/audit-app/compare/v0.5.0...v0.5.1) (2021-02-15)
+
+### Bug fixes
+
+- update pattern for `ignore` paths in config schema ([70ced7f9][])
 
 # [0.5.0](https://github.com/G-Rath/audit-app/compare/v0.4.3...v0.5.0) (2021-02-15)
 
@@ -72,6 +78,7 @@ to be updated.
 
 Initial Release 🎉
 
+[70ced7f9]: https://github.com/G-Rath/audit-app/commit/70ced7f9
 [2e10def0]: https://github.com/G-Rath/audit-app/commit/2e10def0
 [d5c5fd0e]: https://github.com/G-Rath/audit-app/commit/d5c5fd0e
 [86083810]: https://github.com/G-Rath/audit-app/commit/86083810

@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
+import wrapAnsi from 'wrap-ansi';
 import { AuditReport } from './generateReport';
 import { Finding, Severity, SeverityCounts } from './types';
 
@@ -34,15 +35,6 @@ const wordWithCount = (
 
 const countStr = (str: string): number => stripAnsi(str).length;
 const pad = (str: string): string => ` ${str.trim()} `;
-const wrap = (str: string, width: number): string[] => {
-  const regexp = new RegExp(
-    `.{1,${width}}(?:[\\s\u200B]+|$)|[^\\s\u200B]+?(?:[\\s\u200B]+|$)`,
-    'gu'
-  );
-
-  // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-  return str.match(regexp) ?? [];
-};
 
 enum BoxChar {
   LightVertical = '│',
@@ -132,7 +124,9 @@ const buildTable = (
     maxLabelWidth,
     maxValueWidth,
     contents.reduce<string[]>((acc, [label, value], index) => {
-      const lines = wrap(pad(value), maxValueWidth);
+      const lines = wrapAnsi(value, maxValueWidth - 2, {
+        hard: true
+      }).split('\n');
 
       return acc.concat(
         [

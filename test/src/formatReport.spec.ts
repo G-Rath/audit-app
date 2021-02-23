@@ -200,7 +200,7 @@ describe('formatReport', () => {
               '1234': buildFinding({
                 id: 1234,
                 paths: ['one'],
-                range: `>=1.0.${'0'.repeat(50)} < 1.5.0`,
+                range: `<1.2.3 || >2.0.0 < 2.2.1 || >=3.0.0 <3.0.1 || >= 4.0.0 <4.0.3`,
                 title: `The advisory with a very l${'o'.repeat(55)}ng name`
               })
             },
@@ -216,8 +216,39 @@ describe('formatReport', () => {
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
             │ Package          │ yargs-parser                                                 │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
-            │ Vulnerable range │ >=1.0.00000000000000000000000000000000000000000000000000 <   │
-            │                  │ 1.5.0                                                        │
+            │ Vulnerable range │ <1.2.3 || >2.0.0 < 2.2.1 || >=3.0.0 <3.0.1 || >= 4.0.0       │
+            │                  │ <4.0.3                                                       │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ More info        │ https://npmjs.com/advisories/1234                            │
+            └──────────────────┴──────────────────────────────────────────────────────────────┘
+            "
+          `);
+        });
+
+        it('wraps the value columns forcibly when required', () => {
+          const tables = formatReportAndGetTables({
+            findings: {
+              '1234': buildFinding({
+                id: 1234,
+                paths: ['one'],
+                range: `>=1.0.${'0'.repeat(100)} < 1.5.0`,
+                title: `The advisory with a very l${'o'.repeat(100)}ng name`
+              })
+            },
+            vulnerable: ['one']
+          });
+
+          expect(prettifyTables(tables)).toMatchInlineSnapshot(`
+            "
+            ┌──────────────────┬──────────────────────────────────────────────────────────────┐
+            │ low              │ The advisory with a very                                     │
+            │                  │ looooooooooooooooooooooooooooooooooooooooooooooooooooooooooo │
+            │                  │ ooooooooooooooooooooooooooooooooooooooooong name (#1234)     │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Package          │ yargs-parser                                                 │
+            ├──────────────────┼──────────────────────────────────────────────────────────────┤
+            │ Vulnerable range │ >=1.0.000000000000000000000000000000000000000000000000000000 │
+            │                  │ 0000000000000000000000000000000000000000000000 < 1.5.0       │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
             │ More info        │ https://npmjs.com/advisories/1234                            │
             └──────────────────┴──────────────────────────────────────────────────────────────┘

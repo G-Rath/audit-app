@@ -1,4 +1,10 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.1...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.2...HEAD) (YYYY-MM-DD)
+
+# [0.5.2](https://github.com/G-Rath/audit-app/compare/v0.5.1...v0.5.2) (2021-02-24)
+
+### Bug fixes
+
+- use `wrap-ansi` for wrapping text when formatting tables ([191652d8][])
 
 # [0.5.1](https://github.com/G-Rath/audit-app/compare/v0.5.0...v0.5.1) (2021-02-15)
 
@@ -78,6 +84,7 @@ to be updated.
 
 Initial Release 🎉
 
+[191652d8]: https://github.com/G-Rath/audit-app/commit/191652d8
 [70ced7f9]: https://github.com/G-Rath/audit-app/commit/70ced7f9
 [2e10def0]: https://github.com/G-Rath/audit-app/commit/2e10def0
 [d5c5fd0e]: https://github.com/G-Rath/audit-app/commit/d5c5fd0e

@@ -36,12 +36,12 @@ describe('auditApp', () => {
     beforeEach(() => {
       mockedAudit.mockResolvedValue({
         findings: {
-          '1500': buildFinding({
+          1500: buildFinding({
             paths: ['one', 'two'],
             id: 1500,
             severity: 'low'
           }),
-          '1234': buildFinding({
+          1234: buildFinding({
             paths: ['three'],
             id: 1234,
             severity: 'high'

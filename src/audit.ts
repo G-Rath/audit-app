@@ -146,8 +146,20 @@ const toMapOfFindings = (findings: Finding[]): Record<string, Finding> => {
   return theFindings;
 };
 
-type Npm7VulnerabilityWithAdvisory = Omit<Npm7Vulnerability, 'via'> & {
-  via: [Npm7Advisory];
+/**
+ * Finds all the advisories that are included with the given record of
+ * `vulnerabilities` provided by the audit output of `npm` v7.
+ *
+ * @param {Record<string, Npm7Vulnerability>} vulnerabilities
+ *
+ * @return {Array<Npm7Advisory>}
+ */
+const findAdvisories = (
+  vulnerabilities: Record<string, Npm7Vulnerability>
+): Npm7Advisory[] => {
+  return Object.values(vulnerabilities)
+    .reduce<Array<Npm7Advisory | string>>((all, { via }) => all.concat(via), [])
+    .filter((via): via is Npm7Advisory => typeof via === 'object');
 };
 
 const collectNpmAuditResults: AuditResultsCollector = async stdout => {
@@ -183,12 +195,9 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
         if ('auditReportVersion' in auditOutput) {
           resolve({
             findings: toMapOfFindings(
-              Object.values(auditOutput.vulnerabilities)
-                .filter(
-                  (vul): vul is Npm7VulnerabilityWithAdvisory =>
-                    vul.via.length === 1 && typeof vul.via[0] === 'object'
-                )
-                .map(vul => npm7AdvisoryToFinding(vul.via[0]))
+              findAdvisories(auditOutput.vulnerabilities).map(via =>
+                npm7AdvisoryToFinding(via)
+              )
             ),
             dependencyStatistics: extractDependencyStatisticsFromNpm7(
               auditOutput.metadata

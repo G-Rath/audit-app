@@ -159,6 +159,54 @@ describe('audit', () => {
       });
     });
 
+    describe('when there are multiple vulnerabilities against the same package', () => {
+      it('includes them as separate findings', async () => {
+        const fixture = fixtures['serialize-to-js'];
+        const { stdout } = mockSpawnProperties();
+
+        const auditRun = audit('my-dir', 'npm');
+
+        fixture['npm@6'].split('\n').forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        const auditOutput = JSON.parse(fixture['npm@6']) as ParsedNpm7Fixture;
+
+        delete auditOutput.metadata.vulnerabilities;
+
+        expect(results.findings).toMatchInlineSnapshot(`
+          Object {
+            "1429": Object {
+              "id": 1429,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting",
+              "url": "https://npmjs.com/advisories/1429",
+            },
+            "790": Object {
+              "id": 790,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<2.0.0",
+              "severity": "high",
+              "title": "Denial of Service",
+              "url": "https://npmjs.com/advisories/790",
+            },
+          }
+        `);
+        expect(results.dependencyStatistics).toStrictEqual(
+          auditOutput.metadata
+        );
+      });
+    });
+
     describe('when an error occurs', () => {
       it('rejects with the error as the message', async () => {
         const { stdout } = mockSpawnProperties();
@@ -269,6 +317,55 @@ describe('audit', () => {
         devDependencies: auditOutput.metadata.dependencies.dev,
         optionalDependencies: auditOutput.metadata.dependencies.optional,
         totalDependencies: auditOutput.metadata.dependencies.total
+      });
+    });
+
+    describe('when there are multiple vulnerabilities against the same package', () => {
+      it('includes them as separate findings', async () => {
+        const fixture = fixtures['serialize-to-js'];
+        const { stdout } = mockSpawnProperties();
+
+        const auditRun = audit('my-dir', 'npm');
+
+        fixture['npm@7'].split('\n').forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
+
+        expect(results.findings).toMatchInlineSnapshot(`
+          Object {
+            "1429": Object {
+              "id": 1429,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting",
+              "url": "https://npmjs.com/advisories/1429",
+            },
+            "790": Object {
+              "id": 790,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<2.0.0",
+              "severity": "high",
+              "title": "Denial of Service",
+              "url": "https://npmjs.com/advisories/790",
+            },
+          }
+        `);
+        expect(results.dependencyStatistics).toStrictEqual({
+          dependencies: auditOutput.metadata.dependencies.prod,
+          devDependencies: auditOutput.metadata.dependencies.dev,
+          optionalDependencies: auditOutput.metadata.dependencies.optional,
+          totalDependencies: auditOutput.metadata.dependencies.total
+        });
       });
     });
 
@@ -402,6 +499,54 @@ describe('audit', () => {
       expect(results.dependencyStatistics).toStrictEqual(auditOutput.metadata);
     });
 
+    describe('when there are multiple vulnerabilities against the same package', () => {
+      it('includes them as separate findings', async () => {
+        const fixture = fixtures['serialize-to-js'];
+        const { stdout } = mockSpawnProperties();
+
+        const auditRun = audit('my-dir', 'pnpm');
+
+        fixture.pnpm.split('\n').forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        const auditOutput = JSON.parse(fixture.pnpm) as ParsedPnpmFixture;
+
+        delete auditOutput.metadata.vulnerabilities;
+
+        expect(results.findings).toMatchInlineSnapshot(`
+          Object {
+            "1429": Object {
+              "id": 1429,
+              "name": "serialize-to-js",
+              "paths": Array [
+                ".>serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting",
+              "url": "https://npmjs.com/advisories/1429",
+            },
+            "790": Object {
+              "id": 790,
+              "name": "serialize-to-js",
+              "paths": Array [
+                ".>serialize-to-js",
+              ],
+              "range": "<2.0.0",
+              "severity": "high",
+              "title": "Denial of Service",
+              "url": "https://npmjs.com/advisories/790",
+            },
+          }
+        `);
+        expect(results.dependencyStatistics).toStrictEqual(
+          auditOutput.metadata
+        );
+      });
+    });
+
     describe('when the json is not parsable', () => {
       it('rejects', async () => {
         const fixture = fixtures.mkdirp_minimist;
@@ -519,6 +664,55 @@ describe('audit', () => {
             "devDependencies": 0,
             "optionalDependencies": 0,
             "totalDependencies": 3,
+          }
+        `);
+      });
+    });
+
+    describe('when there are multiple vulnerabilities against the same package', () => {
+      it('includes them as separate findings', async () => {
+        const fixture = fixtures['serialize-to-js'];
+        const { stdout } = mockSpawnProperties();
+
+        const auditRun = audit('my-dir', 'yarn');
+
+        fixture.yarn.split('\n').forEach(line => stdout.write(`${line}\n`));
+        stdout.end();
+
+        const results = await auditRun;
+
+        expect(results.findings).toMatchInlineSnapshot(`
+          Object {
+            "1429": Object {
+              "id": 1429,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting",
+              "url": "https://npmjs.com/advisories/1429",
+            },
+            "790": Object {
+              "id": 790,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<2.0.0",
+              "severity": "high",
+              "title": "Denial of Service",
+              "url": "https://npmjs.com/advisories/790",
+            },
+          }
+        `);
+        expect(results.dependencyStatistics).toMatchInlineSnapshot(`
+          Object {
+            "dependencies": 17,
+            "devDependencies": 0,
+            "optionalDependencies": 0,
+            "totalDependencies": 17,
           }
         `);
       });

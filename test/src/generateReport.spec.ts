@@ -16,12 +16,12 @@ describe('generateReport', () => {
   const AnyStatistics = expect.any(Object) as AuditReport['statistics'];
 
   const findings: AuditResults['findings'] = {
-    '1234': buildFinding({
+    1234: buildFinding({
       paths: ['one', 'two'],
       id: 1234,
       severity: 'high'
     }),
-    '1500': buildFinding({
+    1500: buildFinding({
       paths: ['three', 'four', 'five'],
       id: 1500,
       severity: 'low'

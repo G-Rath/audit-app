@@ -170,7 +170,7 @@ describe('formatReport', () => {
         it('prints a table with information on the advisory', () => {
           const tables = formatReportAndGetTables({
             findings: {
-              '1234': buildFinding({
+              1234: buildFinding({
                 id: 1234,
                 paths: ['one'],
                 title: 'My Second Advisory'
@@ -197,7 +197,7 @@ describe('formatReport', () => {
         it('wraps the value columns to a fixed width', () => {
           const tables = formatReportAndGetTables({
             findings: {
-              '1234': buildFinding({
+              1234: buildFinding({
                 id: 1234,
                 paths: ['one'],
                 range: `<1.2.3 || >2.0.0 < 2.2.1 || >=3.0.0 <3.0.1 || >= 4.0.0 <4.0.3`,
@@ -228,7 +228,7 @@ describe('formatReport', () => {
         it('wraps the value columns forcibly when required', () => {
           const tables = formatReportAndGetTables({
             findings: {
-              '1234': buildFinding({
+              1234: buildFinding({
                 id: 1234,
                 paths: ['one'],
                 range: `>=1.0.${'0'.repeat(100)} < 1.5.0`,
@@ -260,13 +260,13 @@ describe('formatReport', () => {
           it('prints one table per advisory', () => {
             const tables = formatReportAndGetTables({
               findings: {
-                '1500': buildFinding({
+                1500: buildFinding({
                   id: 1500,
                   paths: ['one', 'two'],
                   severity: 'low',
                   title: 'My First Advisory'
                 }),
-                '1234': buildFinding({
+                1234: buildFinding({
                   id: 1234,
                   paths: ['three', 'four'],
                   severity: 'high',
@@ -284,9 +284,9 @@ describe('formatReport', () => {
         it('sorts advisories by their name first', () => {
           const tables = formatReportAndGetTables({
             findings: {
-              '1': buildFinding({ name: 'B', id: 1 }),
-              '2': buildFinding({ name: 'C', id: 2 }),
-              '3': buildFinding({ name: 'A', id: 3 })
+              1: buildFinding({ name: 'B', id: 1 }),
+              2: buildFinding({ name: 'C', id: 2 }),
+              3: buildFinding({ name: 'A', id: 3 })
             }
           });
 
@@ -310,19 +310,19 @@ describe('formatReport', () => {
         it('sorts advisories by their severity second', () => {
           const tables = formatReportAndGetTables({
             findings: {
-              '1': buildFinding({
+              1: buildFinding({
                 title: 'My Advisory',
                 id: 1,
                 severity: 'high',
                 name: 'A'
               }),
-              '2': buildFinding({
+              2: buildFinding({
                 title: 'My Advisory',
                 id: 2,
                 severity: 'critical',
                 name: 'A'
               }),
-              '3': buildFinding({
+              3: buildFinding({
                 title: 'My Advisory',
                 id: 3,
                 severity: 'low',
@@ -354,11 +354,11 @@ describe('formatReport', () => {
       it('includes the summary', () => {
         const report: Partial<AuditReport> = {
           findings: {
-            '1500': buildFinding({
+            1500: buildFinding({
               paths: ['one', 'two'],
               severity: 'low'
             }),
-            '1234': buildFinding({
+            1234: buildFinding({
               paths: ['three'],
               id: 1234,
               severity: 'high'

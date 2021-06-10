@@ -67,16 +67,18 @@ const extractDependencyStatisticsFromNpm7 = (
   totalDependencies: metadata.dependencies.total
 });
 
-const tryOrCall = <TParams extends unknown[]>(
-  fn: (...args: TParams) => void,
-  er: (error: Error) => void
-) => (...args: TParams): void => {
-  try {
-    fn(...args);
-  } catch (error) {
-    er(error);
-  }
-};
+const tryOrCall =
+  <TParams extends unknown[]>(
+    fn: (...args: TParams) => void,
+    er: (error: Error) => void
+  ) =>
+  (...args: TParams): void => {
+    try {
+      fn(...args);
+    } catch (error) {
+      er(error);
+    }
+  };
 
 export interface AuditResults {
   findings: Record<string, Finding>;
@@ -126,9 +128,8 @@ const collectYarnAuditResults: AuditResultsCollector = async stdout => {
         }
 
         if (parsedLine.type === 'auditAdvisory') {
-          results.findings[
-            parsedLine.data.advisory.id.toString()
-          ] = npm6AdvisoryToFinding(parsedLine.data.advisory);
+          results.findings[parsedLine.data.advisory.id.toString()] =
+            npm6AdvisoryToFinding(parsedLine.data.advisory);
         }
       }, reject)
     );

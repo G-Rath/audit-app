@@ -102,6 +102,9 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [
+              "0.0.8",
+            ],
           },
         }
       `);
@@ -136,6 +139,9 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [
+              "0.0.8",
+            ],
           },
         }
       `);
@@ -187,6 +193,9 @@ describe('audit', () => {
               "severity": "moderate",
               "title": "Cross-Site Scripting",
               "url": "https://npmjs.com/advisories/1429",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
             "790": Object {
               "id": 790,
@@ -198,6 +207,9 @@ describe('audit', () => {
               "severity": "high",
               "title": "Denial of Service",
               "url": "https://npmjs.com/advisories/790",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
           }
         `);
@@ -271,6 +283,7 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [],
           },
         }
       `);
@@ -309,6 +322,7 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [],
           },
         }
       `);
@@ -346,6 +360,7 @@ describe('audit', () => {
               "severity": "moderate",
               "title": "Cross-Site Scripting",
               "url": "https://npmjs.com/advisories/1429",
+              "versions": Array [],
             },
             "790": Object {
               "id": 790,
@@ -357,6 +372,7 @@ describe('audit', () => {
               "severity": "high",
               "title": "Denial of Service",
               "url": "https://npmjs.com/advisories/790",
+              "versions": Array [],
             },
           }
         `);
@@ -460,6 +476,9 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [
+              "0.0.8",
+            ],
           },
         }
       `);
@@ -493,6 +512,9 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [
+              "0.0.8",
+            ],
           },
         }
       `);
@@ -527,6 +549,9 @@ describe('audit', () => {
               "severity": "moderate",
               "title": "Cross-Site Scripting",
               "url": "https://npmjs.com/advisories/1429",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
             "790": Object {
               "id": 790,
@@ -538,6 +563,9 @@ describe('audit', () => {
               "severity": "high",
               "title": "Denial of Service",
               "url": "https://npmjs.com/advisories/790",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
           }
         `);
@@ -617,6 +645,9 @@ describe('audit', () => {
             "severity": "low",
             "title": "Prototype Pollution",
             "url": "https://npmjs.com/advisories/1179",
+            "versions": Array [
+              "0.0.8",
+            ],
           },
         }
       `);
@@ -655,6 +686,9 @@ describe('audit', () => {
               "severity": "low",
               "title": "Prototype Pollution",
               "url": "https://npmjs.com/advisories/1179",
+              "versions": Array [
+                "0.0.8",
+              ],
             },
           }
         `);
@@ -693,6 +727,9 @@ describe('audit', () => {
               "severity": "moderate",
               "title": "Cross-Site Scripting",
               "url": "https://npmjs.com/advisories/1429",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
             "790": Object {
               "id": 790,
@@ -704,6 +741,9 @@ describe('audit', () => {
               "severity": "high",
               "title": "Denial of Service",
               "url": "https://npmjs.com/advisories/790",
+              "versions": Array [
+                "1.0.0",
+              ],
             },
           }
         `);

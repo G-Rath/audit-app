@@ -78,6 +78,7 @@ const npm7AdvisoryToFinding = (advisory: Npm7Advisory): Finding => ({
   id: advisory.source,
   name: advisory.name,
   paths: [advisory.dependency],
+  versions: [],
   range: advisory.range,
   severity: advisory.severity,
   title: advisory.title,
@@ -91,6 +92,7 @@ const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
     (acc, finding) => acc.concat(finding.paths),
     []
   ),
+  versions: advisory.findings.map(finding => finding.version),
   range: advisory.vulnerable_versions,
   severity: advisory.severity,
   title: advisory.title,

@@ -160,7 +160,12 @@ const buildFindingsTable = (finding: Finding): string =>
       severityColors[finding.severity](finding.severity),
       chalk.whiteBright(`${finding.title} (#${finding.id})`)
     ],
-    ['Package', finding.name],
+    [
+      'Package',
+      `${finding.name} ${Array.from(new Set(finding.versions))
+        .map(version => `v${version}`)
+        .join(', ')}`
+    ],
     ['Vulnerable range', finding.range],
     ['More info', finding.url]
   ]).join('\n');

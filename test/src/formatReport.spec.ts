@@ -392,15 +392,16 @@ describe('formatReport', () => {
   });
 
   describe('when the format is "paths"', () => {
-    it('returns a list containing each vulnerable path', () => {
+    it('returns a sorted list containing each vulnerable path', () => {
       const vulnerable = [
-        '118|gulp>vinyl-fs>glob-watcher>gaze>globule>glob>minimatch',
-        '118|gulp>vinyl-fs>glob-watcher>gaze>globule>minimatch',
-        '577|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
         '782|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
-        '1065|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
-        '1084|webpack>yargs>os-locale>mem',
+        '118|gulp>vinyl-fs>glob-watcher>gaze>globule>glob>minimatch',
+        '577|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
         '1500|webpack>yargs>yargs-parser',
+        '1065|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
+        '1065|gulp>vinyl-fs>glob-watcher>gaze>lodash',
+        '118|gulp>vinyl-fs>glob-watcher>gaze>globule>minimatch',
+        '1084|webpack>yargs>os-locale>mem',
         '1500|webpack-dev-server>yargs>yargs-parser'
       ];
 
@@ -409,7 +410,19 @@ describe('formatReport', () => {
           ...emptyReport,
           vulnerable
         })
-      ).toBe(vulnerable.join('\n'));
+      ).toBe(
+        [
+          '118|gulp>vinyl-fs>glob-watcher>gaze>globule>glob>minimatch',
+          '118|gulp>vinyl-fs>glob-watcher>gaze>globule>minimatch',
+          '577|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
+          '782|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
+          '1065|gulp>vinyl-fs>glob-watcher>gaze>globule>lodash',
+          '1065|gulp>vinyl-fs>glob-watcher>gaze>lodash',
+          '1084|webpack>yargs>os-locale>mem',
+          '1500|webpack-dev-server>yargs>yargs-parser',
+          '1500|webpack>yargs>yargs-parser'
+        ].join('\n')
+      );
     });
 
     describe('when there are no vulnerable paths', () => {

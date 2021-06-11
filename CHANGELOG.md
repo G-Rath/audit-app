@@ -1,5 +1,9 @@
 # [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.3...HEAD) (YYYY-MM-DD)
 
+### Features
+
+- sort the order of vulnerability paths when using the `paths` output ([#13][])
+
 # [0.5.3](https://github.com/G-Rath/audit-app/compare/v0.5.2...v0.5.3) (2021-06-11)
 
 ### Bug fixes
@@ -94,6 +98,7 @@ to be updated.
 
 Initial Release 🎉
 
+[#13]: https://github.com/G-Rath/audit-app/pull/13
 [#11]: https://github.com/G-Rath/audit-app/pull/11
 [#10]: https://github.com/G-Rath/audit-app/pull/10
 [191652d8]: https://github.com/G-Rath/audit-app/commit/191652d8

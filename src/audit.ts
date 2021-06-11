@@ -67,19 +67,6 @@ const extractDependencyStatisticsFromNpm7 = (
   totalDependencies: metadata.dependencies.total
 });
 
-const tryOrCall =
-  <TParams extends unknown[]>(
-    fn: (...args: TParams) => void,
-    er: (error: Error) => void
-  ) =>
-  (...args: TParams): void => {
-    try {
-      fn(...args);
-    } catch (error) {
-      er(error);
-    }
-  };
-
 export interface AuditResults {
   findings: Record<string, Finding>;
   dependencyStatistics: DependencyStatistics;
@@ -113,29 +100,22 @@ const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
 const collectYarnAuditResults: AuditResultsCollector = async stdout => {
   const results: AuditResults = { findings: {}, dependencyStatistics: {} };
 
-  return new Promise<AuditResults>((resolve, reject) => {
-    stdout.on('error', reject);
+  for await (const line of stdout) {
+    const parsedLine = JSON.parse(line.toString()) as ParsedJsonLine;
 
-    stdout.on(
-      'data',
-      tryOrCall<[string]>(line => {
-        const parsedLine = JSON.parse(line) as ParsedJsonLine;
+    if (parsedLine.type === 'auditSummary') {
+      results.dependencyStatistics = extractDependencyStatistics(
+        parsedLine.data
+      );
+    }
 
-        if (parsedLine.type === 'auditSummary') {
-          results.dependencyStatistics = extractDependencyStatistics(
-            parsedLine.data
-          );
-        }
+    if (parsedLine.type === 'auditAdvisory') {
+      results.findings[parsedLine.data.advisory.id.toString()] =
+        npm6AdvisoryToFinding(parsedLine.data.advisory);
+    }
+  }
 
-        if (parsedLine.type === 'auditAdvisory') {
-          results.findings[parsedLine.data.advisory.id.toString()] =
-            npm6AdvisoryToFinding(parsedLine.data.advisory);
-        }
-      }, reject)
-    );
-
-    stdout.on('end', () => resolve(results));
-  });
+  return results;
 };
 
 const toMapOfFindings = (findings: Finding[]): Record<string, Finding> => {
@@ -165,59 +145,45 @@ const findAdvisories = (
 const collectNpmAuditResults: AuditResultsCollector = async stdout => {
   let json = '';
 
-  return new Promise<AuditResults>((resolve, reject) => {
-    stdout.on('error', reject);
+  for await (const line of stdout) {
+    json += line;
+  }
 
-    stdout.on(
-      'data',
-      tryOrCall<[string]>(line => (json += line), reject)
-    );
+  if (json.trim().startsWith('ERROR')) {
+    console.log(json);
 
-    stdout.on(
-      'end',
-      tryOrCall(() => {
-        if (json.trim().startsWith('ERROR')) {
-          console.log(json);
+    throw new Error(json);
+  }
 
-          throw new Error(json);
-        }
+  const auditOutput = JSON.parse(json) as ParsedNpmOutput;
 
-        const auditOutput = JSON.parse(json) as ParsedNpmOutput;
+  if ('error' in auditOutput) {
+    const errorMessage = `${auditOutput.error.code}: ${auditOutput.error.summary}`;
 
-        if ('error' in auditOutput) {
-          const errorMessage = `${auditOutput.error.code}: ${auditOutput.error.summary}`;
+    console.log(errorMessage);
 
-          console.log(errorMessage);
+    throw new Error(errorMessage);
+  }
 
-          throw new Error(errorMessage);
-        }
+  if ('auditReportVersion' in auditOutput) {
+    return {
+      findings: toMapOfFindings(
+        findAdvisories(auditOutput.vulnerabilities).map(via =>
+          npm7AdvisoryToFinding(via)
+        )
+      ),
+      dependencyStatistics: extractDependencyStatisticsFromNpm7(
+        auditOutput.metadata
+      )
+    };
+  }
 
-        if ('auditReportVersion' in auditOutput) {
-          resolve({
-            findings: toMapOfFindings(
-              findAdvisories(auditOutput.vulnerabilities).map(via =>
-                npm7AdvisoryToFinding(via)
-              )
-            ),
-            dependencyStatistics: extractDependencyStatisticsFromNpm7(
-              auditOutput.metadata
-            )
-          });
-
-          return;
-        }
-
-        resolve({
-          findings: toMapOfFindings(
-            Object.values(auditOutput.advisories).map(npm6AdvisoryToFinding)
-          ),
-          dependencyStatistics: extractDependencyStatistics(
-            auditOutput.metadata
-          )
-        });
-      }, reject)
-    );
-  });
+  return {
+    findings: toMapOfFindings(
+      Object.values(auditOutput.advisories).map(npm6AdvisoryToFinding)
+    ),
+    dependencyStatistics: extractDependencyStatistics(auditOutput.metadata)
+  };
 };
 
 export const audit = async (

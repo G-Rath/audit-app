@@ -19,34 +19,33 @@ const fixturesJson: Record<string, AuditFixture> = {};
 const generateAuditOutput = async (
   dir: string,
   packageManager: SupportedPackageManager
-): Promise<string> =>
-  new Promise<string>((resolve, reject) => {
-    const proc = spawn(
-      'npx',
-      [
-        packageManager,
-        'audit',
-        '--json',
-        `--${packageManager === 'yarn' ? 'cwd' : 'prefix'}`,
-        '.'
-      ],
-      { cwd: dir, env: { ...process.env, npm_config_loglevel: undefined } }
-    );
+): Promise<string> => {
+  const proc = spawn(
+    'npx',
+    [
+      packageManager,
+      'audit',
+      '--json',
+      `--${packageManager === 'yarn' ? 'cwd' : 'prefix'}`,
+      '.'
+    ],
+    { cwd: dir, env: { ...process.env, npm_config_loglevel: undefined } }
+  );
 
-    let output = '';
+  let output = '';
 
-    proc.stdout.on('data', (chunk: Buffer) => {
-      try {
-        output += chunk;
-      } catch (error) {
-        reject(error);
-        proc.kill();
-      }
-    });
+  try {
+    for await (const chunk of proc.stdout) {
+      output += chunk;
+    }
 
-    proc.on('close', () => resolve(output));
-    proc.on('error', reject);
-  });
+    return output;
+  } catch (error: unknown) {
+    proc.kill();
+
+    throw error;
+  }
+};
 
 // const writeFixtureOutput = async (fixture: string): Promise<void> => {
 //   await fs.promises.writeFile(

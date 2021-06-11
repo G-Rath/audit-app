@@ -2,6 +2,7 @@
 
 ### Features
 
+- include vulnerable versions in findings when available ([#14][])
 - sort the order of vulnerability paths when using the `paths` output ([#13][])
 
 # [0.5.3](https://github.com/G-Rath/audit-app/compare/v0.5.2...v0.5.3) (2021-06-11)
@@ -98,6 +99,7 @@ to be updated.
 
 Initial Release 🎉
 
+[#14]: https://github.com/G-Rath/audit-app/pull/14
 [#13]: https://github.com/G-Rath/audit-app/pull/13
 [#11]: https://github.com/G-Rath/audit-app/pull/11
 [#10]: https://github.com/G-Rath/audit-app/pull/10

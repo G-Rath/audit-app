@@ -47,6 +47,7 @@ export interface Finding {
   id: number;
   name: string;
   paths: string[];
+  versions: string[];
   range: string;
   severity: Severity;
   title: string;

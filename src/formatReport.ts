@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import stripAnsi from 'strip-ansi';
 import wrapAnsi from 'wrap-ansi';
 import { AuditReport } from './generateReport';
+import { sortVulnerabilityPaths } from './sortVulnerabilityPaths';
 import { Finding, Severity, SeverityCounts } from './types';
 
 export const SupportedReportFormats = [
@@ -230,7 +231,8 @@ const buildReportSummary = (report: AuditReport): string[] => {
 
 const formatters: Record<SupportedReportFormat, ReportFormatter> = {
   json: JSON.stringify,
-  paths: (report): string => report.vulnerable.join('\n'),
+  paths: (report): string =>
+    sortVulnerabilityPaths(report.vulnerable).join('\n'),
   summary: (report): string => buildReportSummary(report).join('\n'),
   tables: (report): string =>
     [

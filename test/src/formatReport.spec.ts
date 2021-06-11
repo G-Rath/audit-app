@@ -107,7 +107,15 @@ describe('formatReport', () => {
           missing: ['1|package', '2|package', '3|package']
         });
 
-        expect(summary).toMatch(/missing 3 vulnerabilities/iu);
+        expect(summary).toMatch(/missing 3 vulnerabilities that were/iu);
+      });
+
+      it('uses the singular correctly', () => {
+        const summary = formatReportAndStripAnsi('summary', {
+          missing: ['1|package']
+        });
+
+        expect(summary).toMatch(/missing 1 vulnerability that was/iu);
       });
     });
 

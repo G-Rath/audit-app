@@ -1,4 +1,6 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.2...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.5.3...HEAD) (YYYY-MM-DD)
+
+# [0.5.3](https://github.com/G-Rath/audit-app/compare/v0.5.2...v0.5.3) (2021-06-11)
 
 ### Bug fixes
 

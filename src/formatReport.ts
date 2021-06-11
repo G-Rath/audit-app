@@ -213,11 +213,14 @@ const buildReportSummary = (report: AuditReport): string[] => {
   }
 
   if (missing) {
+    const grammar =
+      missing === 1 ? 'vulnerability that was' : 'vulnerabilities that were';
+
     lines.push(
       [''],
       [
         '', // leading space
-        `missing ${missing} vulnerabilities that were expected to have to ignored`
+        `error: missing ${missing} ${grammar} expected to have to ignore`
       ]
     );
   }

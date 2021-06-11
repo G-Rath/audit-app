@@ -2,6 +2,9 @@
 
 ### Bug fixes
 
+- improve grammar of "missing ignored vulnerabilities" message ([#11][])
+- make it more obvious that the "missing ignored vulnerabilities" message is an
+  error rather than a warning ([#11][])
 - support dependencies with multiple vulnerabilities when using `npm` v7
   ([#10][])
 
@@ -89,6 +92,7 @@ to be updated.
 
 Initial Release 🎉
 
+[#11]: https://github.com/G-Rath/audit-app/pull/11
 [#10]: https://github.com/G-Rath/audit-app/pull/10
 [191652d8]: https://github.com/G-Rath/audit-app/commit/191652d8
 [70ced7f9]: https://github.com/G-Rath/audit-app/commit/70ced7f9

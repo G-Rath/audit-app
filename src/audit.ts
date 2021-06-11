@@ -61,7 +61,10 @@ export interface AuditResults {
   dependencyStatistics: DependencyStatistics;
 }
 
-type AuditResultsCollector = (stdout: ReadableStream) => Promise<AuditResults>;
+type AuditResultsCollector = (
+  stdout: ReadableStream,
+  dir: string
+) => Promise<AuditResults>;
 
 const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
   id: advisory.id,
@@ -108,7 +111,7 @@ export const toMapOfFindings = (
   return theFindings;
 };
 
-const collectNpmAuditResults: AuditResultsCollector = async stdout => {
+const collectNpmAuditResults: AuditResultsCollector = async (stdout, dir) => {
   let json = '';
 
   for await (const line of stdout) {
@@ -132,7 +135,7 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
   }
 
   if ('auditReportVersion' in auditOutput) {
-    return processNpm7AuditOutput(auditOutput);
+    return processNpm7AuditOutput(auditOutput, dir);
   }
 
   return {
@@ -153,7 +156,7 @@ export const audit = async (
       : collectNpmAuditResults;
 
   const { stdout } = spawn(
-    packageManager,
+    '/home/g-rath/my-npm',
     [
       'audit',
       '--json',
@@ -164,6 +167,7 @@ export const audit = async (
   );
 
   return resultsCollector(
-    stdout.pipe(new ReadlineTransform({ skipEmpty: true }))
+    stdout.pipe(new ReadlineTransform({ skipEmpty: true })),
+    dir
   );
 };

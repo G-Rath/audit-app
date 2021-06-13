@@ -180,11 +180,13 @@ const collectDependencyPaths = (
 const flattenLockToPaths = (lock: PackageLockWithLinks, json: PackageJson) => {
   const topLevelDependencies = listTopLevelDependencies(json);
 
-  const paths = topLevelDependencies.map(name => {
-    return collectDependencyPaths(name, lock.dependencies[name]);
-  });
+  const paths = topLevelDependencies.reduce<string[]>(
+    (ps, name) =>
+      ps.concat(collectDependencyPaths(name, lock.dependencies[name])),
+    []
+  );
 
-  console.log(paths);
+  console.log(paths.join('\n'));
 };
 
 const packageJson: PackageJson = {

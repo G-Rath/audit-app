@@ -223,6 +223,10 @@ export const processNpm7AuditOutput = async (
   const advisories = findAdvisories(auditOutput.vulnerabilities);
 
   const paths = await calculateVulnerabilityPaths(advisories, dir);
+  const pathsAndVersions = await determineVulnerableNpmPackages(
+    advisories,
+    dir
+  );
 
   return {
     findings: toMapOfFindings(

@@ -6,12 +6,15 @@ interface NpmLockDependency {
   dependencies?: Record<string, NpmLockDependency>;
 }
 
+type PathAndVersion = [path: string, version: string];
+
 interface LockDepWithLinks {
   version: string;
   requires?: Record<string, string>;
   dependencies?: Record<string, NpmLockDependency>;
   nodes?: Record<string, LockDepWithLinks>;
   parent?: LockDepWithLinks;
+  paths?: PathAndVersion[];
 }
 
 interface PackageLock {
@@ -134,12 +137,13 @@ const findTopLevelDependencies = (lock: PackageLockWithLinks) => {
 const collectDependencyPaths = (
   name: string,
   dependency: LockDepWithLinks
-): string[] => {
+): PathAndVersion[] => {
   if (dependency.paths) {
     return dependency.paths;
   }
 
-  dependency.paths = [`${name}@${dependency.version}`];
+  // dependency.paths = [`${name}@${dependency.version}`];
+  dependency.paths = [[name, dependency.version]];
 
   if (!dependency.nodes) {
     return dependency.paths;
@@ -147,8 +151,8 @@ const collectDependencyPaths = (
 
   for (const [nodeName, nodeDependency] of Object.entries(dependency.nodes)) {
     dependency.paths.push(
-      ...collectDependencyPaths(nodeName, nodeDependency).map(
-        p => `${name}>${p}`
+      ...collectDependencyPaths(nodeName, nodeDependency).map<PathAndVersion>(
+        ([path, version]) => [`${name}>${path}`, version]
       )
     );
   }
@@ -159,11 +163,14 @@ const collectDependencyPaths = (
 const flattenLockToPaths = (lock: PackageLockWithLinks, json: PackageJson) => {
   const topLevelDependencies = listTopLevelDependencies(json);
 
-  const paths = topLevelDependencies.map(name => {
-    return collectDependencyPaths(name, lock.dependencies[name]);
-  });
+  const paths = topLevelDependencies.reduce<PathAndVersion[]>(
+    (ps, name) =>
+      ps.concat(collectDependencyPaths(name, lock.dependencies[name])),
+    []
+  );
 
-  console.log(paths);
+  console.log(paths.map(p => p.join('@')).join('\n'));
+  console.log(paths.length, 'vs', new Set(paths).size);
 };
 
 const readPackageJson = async (dir: string): Promise<PackageJson> => {

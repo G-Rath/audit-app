@@ -58,7 +58,9 @@ const resolveDependency = (
   }
 
   if (!parent.parent) {
-    throw new Error(`${name} does not have a parent`);
+    throw new Error(
+      `Could not find parent dependency for ${name} - ensure your package-lock.json is valid and matches your package.json`
+    );
   }
 
   return resolveDependency(name, parent.parent);
@@ -148,7 +150,7 @@ const collectDependencyPaths = (
   }
 
   for (const node of Object.entries(dependency.nodes)) {
-    for (const [[path, version]] of collectDependencyPaths(...node)) {
+    for (const [path, version] of collectDependencyPaths(...node)) {
       dependency.paths.push([`${name}>${path}`, version]);
     }
   }
@@ -160,11 +162,15 @@ const flattenLockToPaths = (
   lock: PackageLockWithLinks,
   json: PackageJson
 ): PathAndVersion[] => {
-  return listTopLevelDependencies(json).reduce<PathAndVersion[]>(
-    (ps, name) =>
-      ps.concat(collectDependencyPaths(name, lock.dependencies[name])),
-    []
-  );
+  return listTopLevelDependencies(json).reduce<PathAndVersion[]>((ps, name) => {
+    if (!(name in lock.dependencies)) {
+      throw new Error(
+        `Could not find top-level dependency ${name} - ensure your package-lock.json is valid and matches your package.json`
+      );
+    }
+
+    return ps.concat(collectDependencyPaths(name, lock.dependencies[name]));
+  }, []);
 };
 
 const readPackageJson = async (dir: string): Promise<PackageJson> => {
@@ -188,11 +194,40 @@ const determinePackagePaths = async (dir: string) => {
   return flattenLockToPaths(packageLock, packageJson);
 };
 
-export const determineVulnerableNpmPackages = async (
+const mapPathsToAdvisories = (
+  packagePaths: PathAndVersion[],
+  advisories: Npm7Advisory[]
+): Record<number, PathAndVersion[] | undefined> => {
+  const results: Record<number, PathAndVersion[] | undefined> = {};
+
+  advisories.forEach(advisory => {
+    results[advisory.source] = packagePaths.filter(
+      ([packagePath]) =>
+        packagePath === advisory.name ||
+        packagePath.endsWith(`>${advisory.name}`)
+    );
+    console.log(results[advisory.source]?.length);
+  });
+
+  return results;
+};
+
+/**
+ * Determines which packages are vulnerable to the given advisories by walking
+ * the dependency tree laid out by the `package.json` & `package-lock.json` at
+ * the given `dir` and comparing the name & version of each package to the name
+ * and range described in each advisory.
+ *
+ * @param advisories
+ * @param dir
+ *
+ * @return map of advisories to the packages that they impact
+ */
+export const determineVulnerablePackages = async (
   advisories: Npm7Advisory[],
   dir: string
-): Promise<PathAndVersion[]> => {
+): Promise<Record<number, PathAndVersion[] | undefined>> => {
   const packagePaths = await determinePackagePaths(dir);
 
-  return packagePaths;
+  return mapPathsToAdvisories(packagePaths, advisories);
 };

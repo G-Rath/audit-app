@@ -177,14 +177,19 @@ const extractDependencyStatistics = (
  *
  * @param {Npm7Advisory} advisory
  * @param {Array<string>} paths
+ * @param versions
  *
  * @return {Finding}
  */
-const buildFinding = (advisory: Npm7Advisory, paths: string[]): Finding => ({
+const buildFinding = (
+  advisory: Npm7Advisory,
+  paths: string[],
+  versions: string[]
+): Finding => ({
   id: advisory.source,
   name: advisory.name,
   paths,
-  versions: [],
+  versions,
   range: advisory.range,
   severity: advisory.severity,
   title: advisory.title,
@@ -221,13 +226,16 @@ export const processNpm7AuditOutput = async (
   dir: string
 ): Promise<AuditResults> => {
   const advisories = findAdvisories(auditOutput.vulnerabilities);
-
-  const paths = await calculateVulnerabilityPaths(advisories, dir);
+  const vulnerablePackages = await determineVulnerablePackages(advisories, dir);
 
   return {
     findings: toMapOfFindings(
       advisories.map(via => {
-        return buildFinding(via, paths[via.source] ?? [`???>${via.name}`]);
+        return buildFinding(
+          via,
+          vulnerablePackages[via.source]?.[0] ?? [`???>${via.name}`],
+          vulnerablePackages[via.source]?.[1] ?? []
+        );
       })
     ),
     dependencyStatistics: extractDependencyStatistics(auditOutput.metadata)

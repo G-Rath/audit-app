@@ -68,6 +68,19 @@ const findAdvisories = (
     .filter((via): via is Npm7Advisory => typeof via === 'object');
 };
 
+const transpose = (
+  arr: Array<[a: string, b: string]>
+): [a: string[], b: string[]] => {
+  const result: [a: string[], b: string[]] = [[], []];
+
+  for (const [a, b] of arr) {
+    result[0].push(a);
+    result[1].push(b);
+  }
+
+  return result;
+};
+
 /**
  * Processes the given audit output provided by the `audit` command of `npm` v7,
  * normalizing it into audit results.
@@ -86,13 +99,11 @@ export const processNpm7AuditOutput = async (
 
   return {
     findings: toMapOfFindings(
-      advisories.map(via =>
-        buildFinding(
-          via,
-          vulnerablePackages[via.source][0],
-          vulnerablePackages[via.source][1]
-        )
-      )
+      advisories.map(via => {
+        const [paths, versions] = transpose(vulnerablePackages[via.source]);
+
+        return buildFinding(via, paths, versions);
+      })
     ),
     dependencyStatistics: extractDependencyStatistics(auditOutput.metadata)
   };

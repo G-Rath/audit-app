@@ -5,10 +5,10 @@ import fixtures from '../fixtures';
 type ParsedNpm7Fixture = Npm7AuditOutput;
 
 describe('processNpm7AuditResults', () => {
-  it('processes the output correctly', () => {
+  it('processes the output correctly', async () => {
     const fixture = fixtures.mkdirp_minimist;
     const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
-    const results = processNpm7AuditOutput(auditOutput);
+    const results = await processNpm7AuditOutput(auditOutput, 'my-dir');
 
     expect(results.findings).toMatchInlineSnapshot(`
         Object {
@@ -35,10 +35,10 @@ describe('processNpm7AuditResults', () => {
   });
 
   describe('when there are multiple vulnerabilities against the same package', () => {
-    it('includes them as separate findings', () => {
+    it('includes them as separate findings', async () => {
       const fixture = fixtures['serialize-to-js'];
       const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
-      const results = processNpm7AuditOutput(auditOutput);
+      const results = await processNpm7AuditOutput(auditOutput, 'my-dir');
 
       expect(results.findings).toMatchInlineSnapshot(`
           Object {

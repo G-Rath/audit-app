@@ -1,11 +1,11 @@
 import { promises as fs } from 'fs';
-import { Npm7Advisory } from './types';
-
-interface NpmLockDependency {
-  version: string;
-  requires?: Record<string, string>;
-  dependencies?: Record<string, NpmLockDependency>;
-}
+import { satisfies } from 'semver';
+import {
+  Npm7Advisory,
+  NpmLockDependency,
+  NpmPackageLock,
+  PackageJson
+} from './types';
 
 type PathAndVersion = [path: string, version: string];
 
@@ -18,23 +18,9 @@ interface NpmLockDependencyWithLinks {
   paths?: PathAndVersion[];
 }
 
-interface NpmPackageLock {
-  version: string;
-  dependencies: Record<string, NpmLockDependency>;
-}
-
 interface PackageLockWithLinks {
   version: string;
   dependencies: Record<string, NpmLockDependencyWithLinks>;
-}
-
-interface PackageJson {
-  name?: string;
-  version?: string;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
-  optionalDependencies?: Record<string, string>;
 }
 
 /**
@@ -194,20 +180,27 @@ const determinePackagePaths = async (dir: string) => {
   return flattenLockToPaths(packageLock, packageJson);
 };
 
+const isVulnerable = (
+  advisory: Npm7Advisory,
+  [path, version]: PathAndVersion
+): boolean => {
+  return (
+    (path === advisory.name || path.endsWith(`>${advisory.name}`)) &&
+    satisfies(version, advisory.range)
+  );
+};
+
 const mapPathsToAdvisories = (
   packagePaths: PathAndVersion[],
   advisories: Npm7Advisory[]
-): Record<number, PathAndVersion[] | undefined> => {
-  const results: Record<number, PathAndVersion[] | undefined> = {};
+): Record<number, PathAndVersion[]> => {
+  const results: Record<number, PathAndVersion[]> = {};
 
-  advisories.forEach(advisory => {
-    results[advisory.source] = packagePaths.filter(
-      ([packagePath]) =>
-        packagePath === advisory.name ||
-        packagePath.endsWith(`>${advisory.name}`)
+  for (const advisory of advisories) {
+    results[advisory.source] = packagePaths.filter(info =>
+      isVulnerable(advisory, info)
     );
-    console.log(results[advisory.source]?.length);
-  });
+  }
 
   return results;
 };
@@ -226,7 +219,7 @@ const mapPathsToAdvisories = (
 export const determineVulnerablePackages = async (
   advisories: Npm7Advisory[],
   dir: string
-): Promise<Record<number, PathAndVersion[] | undefined>> => {
+): Promise<Record<number, PathAndVersion[]>> => {
   const packagePaths = await determinePackagePaths(dir);
 
   return mapPathsToAdvisories(packagePaths, advisories);

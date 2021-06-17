@@ -1,27 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { determineVulnerablePackages } from '../../src/determineVulnerablePackages';
-import { Npm7Advisory } from '../../src/types';
-
-interface NpmLockDependency {
-  version: string;
-  requires?: Record<string, string>;
-  dependencies?: Record<string, NpmLockDependency>;
-}
-
-interface NpmPackageLock {
-  version: string;
-  dependencies: Record<string, NpmLockDependency>;
-}
-
-interface PackageJson {
-  name?: string;
-  version?: string;
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
-  optionalDependencies?: Record<string, string>;
-}
+import { Npm7Advisory, NpmPackageLock, PackageJson } from '../../src/types';
 
 const writeJsonFile = async <TContents>(
   dir: string,
@@ -48,52 +28,6 @@ const writePackageJsonAndLock = async (
   });
 };
 
-const packageJson: PackageJson = {
-  dependencies: {
-    a: '^1.0.0',
-    c: '^1.0.0',
-    d: '^1.1.0',
-    e: '^2.0.0'
-  }
-};
-
-const packageLock: NpmPackageLock = {
-  version: '1.0.0',
-  dependencies: {
-    a: {
-      version: '1.0.0',
-      requires: { b: '^1.0.0' }
-    },
-    b: { version: '1.0.4' },
-    c: {
-      version: '1.0.1',
-      requires: { b: '^2.0.0' },
-      dependencies: {
-        b: { version: '2.3.0' }
-      }
-    },
-    d: {
-      version: '1.2.1',
-      requires: { b: '^2.0.0', c: '^1.0.0' },
-      dependencies: {
-        b: { version: '2.3.0' },
-        c: { version: '1.0.1', requires: { b: '^2.0.0' } }
-      }
-    },
-    e: {
-      version: '2.5.8',
-      requires: { b: '^3.0.0', c: '^2.0.4' },
-      dependencies: {
-        b: { version: '3.1.0' },
-        c: {
-          version: '2.0.5',
-          requires: { b: '^3.0.0' }
-        }
-      }
-    }
-  }
-};
-
 const advisory: Npm7Advisory = {
   dependency: '',
   name: '',
@@ -105,21 +39,6 @@ const advisory: Npm7Advisory = {
 } as const;
 
 describe('determineVulnerablePackages', () => {
-  // todo: test "dir" locations
-  // todo: handling of *tons* of paths (?)
-  // todo: git dependencies (?)
-  // todo: full lock + some advisories
-  // todo: empty lock + some advisories
-  // todo: "it only finds packages that match the advisory version"
-  // todo: direct dependency
-  // todo: indirect dependency
-  // todo: both direct and indirect dependency, both vulnerable
-  // todo: both direct and indirect dependency, neither vulnerable
-  // todo: both direct and indirect dependency, direct vulnerable
-  // todo: both direct and indirect dependency, indirect vulnerable
-  // todo: nested dependencies, with deduplication
-  // todo: cyclical dependencies
-
   beforeEach(async () => {
     await fs.mkdir('my-dir', { recursive: true });
   });
@@ -169,13 +88,34 @@ describe('determineVulnerablePackages', () => {
     });
   });
 
+  describe('when the package-lock.json is empty', () => {
+    beforeEach(async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { a: '^1.0.0' } },
+        {}
+      );
+    });
+
+    it('throws an error', async () => {
+      await expect(determineVulnerablePackages([], 'my-dir')).rejects.toThrow(
+        /Could not find top-level dependency a/iu
+      );
+    });
+  });
+
   describe('when there is a valid package.json and package-lock.json', () => {
     describe('when there are no advisories', () => {
       it('returns an empty object', async () => {
         await writePackageJsonAndLock(
           'my-dir',
-          packageJson,
-          packageLock.dependencies
+          { dependencies: { a: '^1.0.0' } },
+          {
+            a: { version: '1.0.0', requires: { b: '^1.0.0' } },
+            b: { version: '1.0.0', requires: { c: '^1.0.0' } },
+            c: { version: '1.0.0', requires: { d: '^1.0.0' } },
+            d: { version: '1.0.0' }
+          }
         );
 
         await expect(
@@ -335,8 +275,6 @@ describe('determineVulnerablePackages', () => {
       });
     });
 
-    // todo: alias dependencies
-    // todo: flesh out more - suspect there are edge-cases here (re version checking)
     it('supports aliases', async () => {
       await writePackageJsonAndLock(
         'my-dir',
@@ -369,73 +307,203 @@ describe('determineVulnerablePackages', () => {
         1179: [['myp>minimist', '0.0.8']]
       });
     });
-  });
 
-  describe('when the lock is empty', () => {
-    beforeEach(async () => {
+    it('supports different types of dependencies', async () => {
       await writePackageJsonAndLock(
         'my-dir',
-        { dependencies: { a: '^1.0.0' } },
-        {}
+        {
+          optionalDependencies: { a: '^1.0.0' },
+          peerDependencies: { c: '^1.0.0' }
+        },
+        {
+          a: {
+            version: '1.0.0',
+            requires: { b: '^1.0.0', c: '^1.0.0', d: '^1.0.0' }
+          },
+          b: { version: '1.0.0' },
+          c: { version: '1.0.0' },
+          d: { version: '1.0.0' }
+        }
       );
+
+      await expect(
+        determineVulnerablePackages(
+          [
+            { ...advisory, name: 'b', source: 1 },
+            { ...advisory, name: 'c', source: 2 },
+            { ...advisory, name: 'd', source: 3 }
+          ],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [['a>b', '1.0.0']],
+        2: [
+          ['a>c', '1.0.0'],
+          ['c', '1.0.0']
+        ],
+        3: [['a>d', '1.0.0']]
+      });
     });
 
-    it('throws an error', async () => {
-      await expect(determineVulnerablePackages([], 'my-dir')).rejects.toThrow(
-        /Could not find top-level dependency a/iu
+    it('handles basic semver ranges', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          dependencies: {
+            a: '^1.0.0',
+            c: '^1.0.0'
+          }
+        },
+        {
+          a: { version: '1.0.0', requires: { b: '^1.0.0' } },
+          b: { version: '1.0.4' },
+          c: {
+            version: '1.0.1',
+            requires: { b: '^2.0.0' },
+            dependencies: {
+              b: { version: '2.3.0' }
+            }
+          }
+        }
       );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, name: 'b', range: '^1.0.2' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [['a>b', '1.0.4']]
+      });
+    });
+
+    it('handles complex semver ranges', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          dependencies: {
+            a: '^1.0.0',
+            c: '^1.0.0',
+            d: '^1.1.0',
+            e: '^2.0.0'
+          }
+        },
+        {
+          a: {
+            version: '1.0.0',
+            requires: { b: '^1.0.0' }
+          },
+          b: { version: '1.0.4' },
+          c: {
+            version: '1.0.1',
+            requires: { b: '^2.0.0' },
+            dependencies: {
+              b: { version: '2.3.0' }
+            }
+          },
+          d: {
+            version: '1.2.1',
+            requires: { b: '^2.0.0', c: '^1.0.0' },
+            dependencies: {
+              b: { version: '2.3.1' },
+              c: { version: '1.0.1', requires: { b: '^2.0.0' } }
+            }
+          },
+          e: {
+            version: '2.5.8',
+            requires: { b: '^3.0.0', c: '^2.0.4' },
+            dependencies: {
+              b: { version: '3.1.0' },
+              c: {
+                version: '2.0.5',
+                requires: { b: '^3.0.0' }
+              }
+            }
+          }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, name: 'b', range: '<1.0.5 || >=2.0.0 <2.3.1' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['a>b', '1.0.4'],
+          ['c>b', '2.3.0']
+        ]
+      });
+    });
+
+    it('handles different ranges for different dependencies', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          dependencies: {
+            a: '^1.0.0',
+            c: '^1.0.0',
+            d: '^1.1.0',
+            e: '^2.0.0'
+          }
+        },
+        {
+          a: {
+            version: '1.0.0',
+            requires: { b: '^1.0.0' }
+          },
+          b: { version: '1.0.4' },
+          c: {
+            version: '1.0.1',
+            requires: { b: '^2.0.0' },
+            dependencies: {
+              b: { version: '2.3.0' }
+            }
+          },
+          d: {
+            version: '1.2.1',
+            requires: { b: '^2.0.0', c: '^1.0.0' },
+            dependencies: {
+              b: { version: '2.3.1' },
+              c: { version: '1.0.1', requires: { b: '^2.0.0' } }
+            }
+          },
+          e: {
+            version: '2.5.8',
+            requires: { b: '^3.0.0', c: '^2.0.4' },
+            dependencies: {
+              b: { version: '3.1.0' },
+              c: {
+                version: '2.0.5',
+                requires: { b: '^3.0.0' }
+              }
+            }
+          }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [
+            {
+              ...advisory,
+              source: 1,
+              name: 'b',
+              range: '<1.0.5 || >=2.0.0 <2.3.1'
+            },
+            { ...advisory, source: 2, name: 'c', range: '>= 2.0.0' },
+            { ...advisory, source: 3, name: 'e', range: '< 0.5.0' }
+          ],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['a>b', '1.0.4'],
+          ['c>b', '2.3.0']
+        ],
+        2: [['e>c', '2.0.5']],
+        3: []
+      });
     });
   });
 });
-
-// const x = {
-//   auditReportVersion: 2,
-//   vulnerabilities: {
-//     minimist: {
-//       name: 'minimist',
-//       severity: 'low',
-//       via: [
-//         {
-//           source: 1179,
-//           name: 'minimist',
-//           dependency: 'minimist',
-//           title: 'Prototype Pollution',
-//           url: 'https://npmjs.com/advisories/1179',
-//           severity: 'low',
-//           range: '<0.2.1 || >=1.0.0 <1.2.3'
-//         }
-//       ],
-//       effects: ['mkdirp'],
-//       range: '<0.2.1 || >=1.0.0 <1.2.3',
-//       nodes: ['node_modules/minimist'],
-//       fixAvailable: true
-//     },
-//     mkdirp: {
-//       name: 'mkdirp',
-//       severity: 'low',
-//       via: ['minimist'],
-//       effects: [],
-//       range: '0.4.1 - 0.5.1',
-//       nodes: ['node_modules/myp'],
-//       fixAvailable: true
-//     }
-//   },
-//   metadata: {
-//     vulnerabilities: {
-//       info: 0,
-//       low: 2,
-//       moderate: 0,
-//       high: 0,
-//       critical: 0,
-//       total: 2
-//     },
-//     dependencies: {
-//       prod: 3,
-//       dev: 0,
-//       optional: 0,
-//       peer: 0,
-//       peerOptional: 0,
-//       total: 2
-//     }
-//   }
-// };

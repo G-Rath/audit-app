@@ -47,6 +47,7 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "readline-transform": "^1.0.0",
+    "semver": "^7.3.5",
     "strip-ansi": "^6.0.0",
     "wrap-ansi": "^7.0.0",
     "yargs": "^16.0.3"
@@ -57,6 +58,7 @@
     "@types/jest": "^26.0.23",
     "@types/node": "^14.17.3",
     "@types/readline-transform": "^1.0.0",
+    "@types/semver": "^7.3.6",
     "@types/wrap-ansi": "^3.0.0",
     "@types/yargs": "^16.0.3",
     "@typescript-eslint/eslint-plugin": "^4.26.1",

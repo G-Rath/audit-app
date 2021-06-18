@@ -3,6 +3,22 @@ import path from 'path';
 import { determineVulnerablePackages } from '../../src/determineVulnerablePackages';
 import { Npm7Advisory, NpmPackageLock, PackageJson } from '../../src/types';
 
+const pullIntoMemoryFS = async (filename: string) => {
+  const actualFS = jest.requireActual<typeof import('fs')>('fs').promises;
+
+  await fs.writeFile(filename, await actualFS.readFile(filename));
+};
+
+const loadFixture = async (name: string) => {
+  const fixturePath = path.join(__dirname, '..', 'fixtures', name);
+
+  await fs.mkdir(fixturePath, { recursive: true });
+  await pullIntoMemoryFS(path.join(fixturePath, 'package.json'));
+  await pullIntoMemoryFS(path.join(fixturePath, 'package-lock.json'));
+
+  return fixturePath;
+};
+
 const writeJsonFile = async <TContents>(
   dir: string,
   filename: string,
@@ -503,6 +519,29 @@ describe('determineVulnerablePackages', () => {
         ],
         2: [['e>c', '2.0.5']],
         3: []
+      });
+    });
+  });
+
+  describe('e2e', () => {
+    it('has the expected output for the mkdirp fixture', async () => {
+      await expect(
+        determineVulnerablePackages(
+          [
+            {
+              source: 1179,
+              name: 'minimist',
+              dependency: 'minimist',
+              title: 'Prototype Pollution',
+              url: 'https://npmjs.com/advisories/1179',
+              severity: 'low',
+              range: '<0.2.1 || >=1.0.0 <1.2.3'
+            }
+          ],
+          await loadFixture('mkdirp')
+        )
+      ).resolves.toStrictEqual({
+        1179: [['mkdirp>minimist', '0.0.8']]
       });
     });
   });

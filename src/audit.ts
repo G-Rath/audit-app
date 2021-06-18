@@ -156,7 +156,7 @@ export const audit = async (
       : collectNpmAuditResults;
 
   const { stdout } = spawn(
-    '/home/g-rath/my-npm',
+    '/home/g-rath/js-package-managers/shim.js',
     [
       'audit',
       '--json',

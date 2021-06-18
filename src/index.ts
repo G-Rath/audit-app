@@ -12,7 +12,7 @@ export interface Options {
 
 export const auditApp = async (options: Options): Promise<void> => {
   if (options.debug) {
-    console.log(`auditing with ${options.packageManager}...`);
+    console.error(`auditing with ${options.packageManager}...`);
   }
 
   try {

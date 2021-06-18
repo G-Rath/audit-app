@@ -1,6 +1,7 @@
 /* eslint-disable jest/require-top-level-describe, node/no-sync, @typescript-eslint/no-explicit-any */
 
 import { DirectoryJSON, createFsFromVolume, vol } from 'memfs';
+import path from 'path';
 import { ufs } from 'unionfs';
 
 /**
@@ -11,6 +12,22 @@ import { ufs } from 'unionfs';
  */
 export const cwdAsJson = (): DirectoryJSON =>
   vol.toJSON(process.cwd(), undefined, true);
+
+const pullIntoMemoryFS = async (filename: string) => {
+  const actualFS = jest.requireActual<typeof import('fs')>('fs').promises;
+
+  await vol.promises.writeFile(filename, await actualFS.readFile(filename));
+};
+
+export const loadNpmFixture = async (name: string): Promise<string> => {
+  const fixturePath = path.join(__dirname, 'fixtures', name);
+
+  await vol.promises.mkdir(fixturePath, { recursive: true });
+  await pullIntoMemoryFS(path.join(fixturePath, 'package.json'));
+  await pullIntoMemoryFS(path.join(fixturePath, 'package-lock.json'));
+
+  return fixturePath;
+};
 
 /**
  * "mock" the file system to use a union'd file system.

@@ -98,13 +98,26 @@ function linkLock(lock: NpmPackageLock): asserts lock is PackageLockWithLinks {
   linkDependencies(lock.dependencies, lock);
 }
 
-const listTopLevelDependencies = (json: PackageJson): string[] => {
-  return Object.keys({
+const listTopLevelDependencies = (
+  json: PackageJson,
+  lock: PackageLockWithLinks
+): string[] => {
+  const topLevelDependencies = {
     ...json.dependencies,
     ...json.devDependencies,
     ...json.optionalDependencies,
     ...json.peerDependencies
-  });
+  };
+
+  // account for workspaces, which will be `file:` dependencies that are not in
+  // the `package.json` as a top-level dependency
+  for (const [name, { version, parent }] of Object.entries(lock.dependencies)) {
+    if (version.startsWith('file:') && parent === lock) {
+      topLevelDependencies[name] = version;
+    }
+  }
+
+  return Object.keys(topLevelDependencies);
 };
 
 const collectDependencyPaths = (
@@ -130,15 +143,18 @@ const flattenLockToPaths = (
   lock: PackageLockWithLinks,
   json: PackageJson
 ): PathAndVersion[] => {
-  return listTopLevelDependencies(json).reduce<PathAndVersion[]>((ps, name) => {
-    if (!(name in lock.dependencies)) {
-      throw new Error(
-        `Could not find top-level dependency ${name} - ensure your package-lock.json is valid and matches your package.json`
-      );
-    }
+  return listTopLevelDependencies(json, lock).reduce<PathAndVersion[]>(
+    (ps, name) => {
+      if (!(name in lock.dependencies)) {
+        throw new Error(
+          `Could not find top-level dependency ${name} - ensure your package-lock.json is valid and matches your package.json`
+        );
+      }
 
-    return ps.concat(collectDependencyPaths(name, lock.dependencies[name]));
-  }, []);
+      return ps.concat(collectDependencyPaths(name, lock.dependencies[name]));
+    },
+    []
+  );
 };
 
 const readPackageJson = async (dir: string): Promise<PackageJson> => {

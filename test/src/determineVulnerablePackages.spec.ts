@@ -521,6 +521,321 @@ describe('determineVulnerablePackages', () => {
         3: []
       });
     });
+
+    it('supports file: dependencies', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { nest: 'file:nest' } },
+        {
+          nest: { version: 'file:nest', requires: { ssri: '6.0.0' } },
+          ssri: { version: '6.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({ 1: [['nest>ssri', '6.0.0']] });
+    });
+
+    it('supports dependencies within file: dependencies', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { nest: 'file:nest' } },
+        {
+          nest: {
+            version: 'file:nest',
+            requires: { ssri: '6.0.0' },
+            dependencies: { ssri: { version: '6.0.0' } }
+          }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({ 1: [['nest>ssri', '6.0.0']] });
+    });
+
+    it('handles different dependency versions with a file: dependency present', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { nest: 'file:nest', ssri: '^6.0.1' } },
+        {
+          'figgy-pudding': { version: '3.5.2' },
+          'nest': {
+            version: 'file:nest',
+            requires: { ssri: '6.0.0' },
+            dependencies: { ssri: { version: '6.0.0' } }
+          },
+          'ssri': { version: '6.0.2', requires: { 'figgy-pudding': '^3.5.1' } }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri', range: '6.0.0' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({ 1: [['nest>ssri', '6.0.0']] });
+    });
+
+    it('supports workspaces', async () => {
+      // workspaces are the same as file: dependencies, except that the package
+      // are not listed in package.json like top-level dependencies are
+      await writePackageJsonAndLock(
+        'my-dir',
+        {},
+        {
+          'pa': { version: 'file:packages/pa', requires: { ssri: '^6.0.0' } },
+          'pb': { version: 'file:packages/pb' },
+          'figgy-pudding': { version: '3.5.2' },
+          'ssri': { version: '6.0.2', requires: { 'figgy-pudding': '^3.5.1' } }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({ 1: [['pa>ssri', '6.0.2']] });
+    });
+
+    it('supports workspaces with multiple folders', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { workspaces: ['./packages/**', './libraries/**'] },
+        {
+          lc: { version: 'file:libraries/lc', requires: { ssri: '6.0.0' } },
+          minipass: { version: '3.1.3', requires: { yallist: '^4.0.0' } },
+          pa: {
+            version: 'file:packages/pa',
+            requires: { ssri: '8.0.0' },
+            dependencies: {
+              ssri: { version: '8.0.0', requires: { minipass: '^3.1.1' } }
+            }
+          },
+          pb: { version: 'file:packages/pb' },
+          ssri: { version: '6.0.0' },
+          yallist: { version: '4.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri', range: '6.0.0' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({ 1: [['lc>ssri', '6.0.0']] });
+    });
+
+    it('supports workspaces with multiple folders and top-level dependencies', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          devDependencies: { ssri: '6.0.0' },
+          workspaces: ['./packages/**', './libraries/**']
+        },
+        {
+          lc: { version: 'file:libraries/lc', requires: { ssri: '6.0.0' } },
+          minipass: { version: '3.1.3', requires: { yallist: '^4.0.0' } },
+          pa: {
+            version: 'file:packages/pa',
+            requires: { ssri: '8.0.0' },
+            dependencies: {
+              ssri: { version: '8.0.0', requires: { minipass: '^3.1.1' } }
+            }
+          },
+          pb: { version: 'file:packages/pb' },
+          ssri: { version: '6.0.0' },
+          yallist: { version: '4.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [
+            { ...advisory, source: 1, name: 'ssri', range: '6.0.0' },
+            { ...advisory, source: 2, name: 'ssri', range: '8.0.0' },
+            { ...advisory, source: 3, name: 'minipass', range: '^3.0.0' }
+          ],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['ssri', '6.0.0'],
+          ['lc>ssri', '6.0.0']
+        ],
+        2: [['pa>ssri', '8.0.0']],
+        3: [['pa>ssri>minipass', '3.1.3']]
+      });
+    });
+
+    it('supports file: within folders', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { 'package-a': 'file:folder/package-a' } },
+        {
+          'package-a': {
+            version: 'file:folder/package-a',
+            requires: { ssri: '6.0.0' }
+          },
+          'ssri': { version: '6.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri', range: '6.0.0' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [['package-a>ssri', '6.0.0']]
+      });
+    });
+
+    it('supports nested file: dependencies', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        { dependencies: { 'package-a': 'file:package-a' } },
+        {
+          'package-a': {
+            version: 'file:package-a',
+            requires: { 'package-b': 'file:package-b' }
+          },
+          'package-b': {
+            version: 'file:package-a/package-b',
+            requires: { ssri: '6.0.0' }
+          },
+          'ssri': { version: '6.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [{ ...advisory, source: 1, name: 'ssri', range: '6.0.0' }],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['package-a>package-b>ssri', '6.0.0'],
+          ['package-b>ssri', '6.0.0']
+        ]
+      });
+    });
+
+    it('supports nested file dependencies with workspaces', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          dependencies: { 'package-a': 'file:package-a' },
+          workspaces: ['./packages/**']
+        },
+        {
+          'minipass': {
+            version: '3.1.3',
+            requires: { yallist: '^4.0.0' }
+          },
+          'pa': {
+            version: 'file:packages/pa',
+            requires: { ssri: '8.0.0' },
+            dependencies: {
+              ssri: {
+                version: '8.0.0',
+                requires: { minipass: '^3.1.1' }
+              }
+            }
+          },
+          'package-a': {
+            version: 'file:package-a',
+            requires: { 'package-b': 'file:package-b' }
+          },
+          'package-b': {
+            version: 'file:package-a/package-b',
+            requires: { ssri: '6.0.0' }
+          },
+          'ssri': { version: '6.0.0' },
+          'yallist': { version: '4.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [
+            { ...advisory, source: 1, name: 'ssri', range: '6.0.0' },
+            { ...advisory, source: 2, name: 'ssri', range: '8.0.0' },
+            { ...advisory, source: 3, name: 'minipass', range: '^3.0.0' }
+          ],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['package-a>package-b>ssri', '6.0.0'],
+          ['package-b>ssri', '6.0.0']
+        ],
+        2: [['pa>ssri', '8.0.0']],
+        3: [['pa>ssri>minipass', '3.1.3']]
+      });
+    });
+
+    it('supports workspace packages depending on each other', async () => {
+      await writePackageJsonAndLock(
+        'my-dir',
+        {
+          dependencies: { 'package-a': 'file:package-a' },
+          workspaces: ['./packages/**']
+        },
+        {
+          'minipass': {
+            version: '3.1.3',
+            requires: { yallist: '^4.0.0' }
+          },
+          'pa': {
+            version: 'file:packages/pa',
+            requires: { ssri: '8.0.0' },
+            dependencies: {
+              ssri: {
+                version: '8.0.0',
+                requires: { minipass: '^3.1.1' }
+              }
+            }
+          },
+          'package-a': {
+            version: 'file:package-a',
+            requires: { 'package-b': '^1.0.0' }
+          },
+          'package-b': {
+            version: 'file:package-a/package-b',
+            requires: { ssri: '6.0.0' }
+          },
+          'ssri': { version: '6.0.0' },
+          'yallist': { version: '4.0.0' }
+        }
+      );
+
+      await expect(
+        determineVulnerablePackages(
+          [
+            { ...advisory, source: 1, name: 'ssri', range: '6.0.0' },
+            { ...advisory, source: 2, name: 'ssri', range: '8.0.0' },
+            { ...advisory, source: 3, name: 'minipass', range: '^3.0.0' }
+          ],
+          'my-dir'
+        )
+      ).resolves.toStrictEqual({
+        1: [
+          ['package-a>package-b>ssri', '6.0.0'],
+          ['package-b>ssri', '6.0.0']
+        ],
+        2: [['pa>ssri', '8.0.0']],
+        3: [['pa>ssri>minipass', '3.1.3']]
+      });
+    });
   });
 
   describe('e2e', () => {

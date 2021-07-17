@@ -1,13 +1,11 @@
 import { spawn } from 'child_process';
 import ReadlineTransform from 'readline-transform';
+import { processNpm7AuditOutput } from './processNpm7AuditOutput';
 import {
   AuditMetadata,
   AuditOutput,
   Finding,
   Npm6Advisory,
-  Npm7Advisory,
-  Npm7AuditMetadata,
-  Npm7Vulnerability,
   Resolution,
   Statistics
 } from './types';
@@ -58,32 +56,15 @@ const extractDependencyStatistics = (
   return statistics;
 };
 
-const extractDependencyStatisticsFromNpm7 = (
-  metadata: Npm7AuditMetadata
-): DependencyStatistics => ({
-  dependencies: metadata.dependencies.prod,
-  devDependencies: metadata.dependencies.dev,
-  optionalDependencies: metadata.dependencies.optional,
-  totalDependencies: metadata.dependencies.total
-});
-
 export interface AuditResults {
   findings: Record<string, Finding>;
   dependencyStatistics: DependencyStatistics;
 }
 
-type AuditResultsCollector = (stdout: ReadableStream) => Promise<AuditResults>;
-
-const npm7AdvisoryToFinding = (advisory: Npm7Advisory): Finding => ({
-  id: advisory.source,
-  name: advisory.name,
-  paths: [advisory.dependency],
-  versions: [],
-  range: advisory.range,
-  severity: advisory.severity,
-  title: advisory.title,
-  url: advisory.url
-});
+type AuditResultsCollector = (
+  stdout: ReadableStream,
+  dir: string
+) => Promise<AuditResults>;
 
 const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
   id: advisory.id,
@@ -120,7 +101,9 @@ const collectYarnAuditResults: AuditResultsCollector = async stdout => {
   return results;
 };
 
-const toMapOfFindings = (findings: Finding[]): Record<string, Finding> => {
+export const toMapOfFindings = (
+  findings: Finding[]
+): Record<string, Finding> => {
   const theFindings: Record<string, Finding> = {};
 
   findings.forEach(finding => (theFindings[finding.id.toString()] = finding));
@@ -128,23 +111,7 @@ const toMapOfFindings = (findings: Finding[]): Record<string, Finding> => {
   return theFindings;
 };
 
-/**
- * Finds all the advisories that are included with the given record of
- * `vulnerabilities` provided by the audit output of `npm` v7.
- *
- * @param {Record<string, Npm7Vulnerability>} vulnerabilities
- *
- * @return {Array<Npm7Advisory>}
- */
-const findAdvisories = (
-  vulnerabilities: Record<string, Npm7Vulnerability>
-): Npm7Advisory[] => {
-  return Object.values(vulnerabilities)
-    .reduce<Array<Npm7Advisory | string>>((all, { via }) => all.concat(via), [])
-    .filter((via): via is Npm7Advisory => typeof via === 'object');
-};
-
-const collectNpmAuditResults: AuditResultsCollector = async stdout => {
+const collectNpmAuditResults: AuditResultsCollector = async (stdout, dir) => {
   let json = '';
 
   for await (const line of stdout) {
@@ -168,16 +135,7 @@ const collectNpmAuditResults: AuditResultsCollector = async stdout => {
   }
 
   if ('auditReportVersion' in auditOutput) {
-    return {
-      findings: toMapOfFindings(
-        findAdvisories(auditOutput.vulnerabilities).map(via =>
-          npm7AdvisoryToFinding(via)
-        )
-      ),
-      dependencyStatistics: extractDependencyStatisticsFromNpm7(
-        auditOutput.metadata
-      )
-    };
+    return processNpm7AuditOutput(auditOutput, dir);
   }
 
   return {
@@ -209,6 +167,7 @@ export const audit = async (
   );
 
   return resultsCollector(
-    stdout.pipe(new ReadlineTransform({ skipEmpty: true }))
+    stdout.pipe(new ReadlineTransform({ skipEmpty: true })),
+    dir
   );
 };

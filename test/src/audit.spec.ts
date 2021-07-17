@@ -2,6 +2,7 @@ import { ChildProcess, spawn } from 'child_process';
 import { PassThrough, Writable } from 'stream';
 import { mocked } from 'ts-jest/utils';
 import { audit } from '../../src/audit';
+import { processNpm7AuditOutput } from '../../src/processNpm7AuditOutput';
 import {
   Npm6AuditOutput,
   Npm7AuditOutput,
@@ -21,8 +22,10 @@ type ParsedNpm7Fixture = WithOptionalVulnerabilitiesInMetadata<Npm7AuditOutput>;
 type ParsedPnpmFixture = WithOptionalVulnerabilitiesInMetadata<PnpmAuditOutput>;
 
 jest.mock('child_process');
+jest.mock('../../src/processNpm7AuditOutput');
 
 const spawnMock = mocked(spawn);
+const processNpm7AuditOutputMock = mocked(processNpm7AuditOutput);
 
 const mockSpawnProperties = (): { stdout: Writable; stderr: Writable } => {
   const out = {
@@ -258,7 +261,7 @@ describe('audit', () => {
       );
     });
 
-    it('returns the parsed audit results', async () => {
+    it('processes the results using the npm7 audit output processor', async () => {
       const fixture = fixtures.mkdirp;
       const { stdout } = mockSpawnProperties();
 
@@ -267,32 +270,15 @@ describe('audit', () => {
       fixture['npm@7'].split('\n').forEach(line => stdout.write(`${line}\n`));
       stdout.end();
 
-      const results = await auditRun;
+      await auditRun;
 
       const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
 
-      expect(results.findings).toMatchInlineSnapshot(`
-        Object {
-          "1179": Object {
-            "id": 1179,
-            "name": "minimist",
-            "paths": Array [
-              "minimist",
-            ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
-            "versions": Array [],
-          },
-        }
-      `);
-      expect(results.dependencyStatistics).toStrictEqual({
-        dependencies: auditOutput.metadata.dependencies.prod,
-        devDependencies: auditOutput.metadata.dependencies.dev,
-        optionalDependencies: auditOutput.metadata.dependencies.optional,
-        totalDependencies: auditOutput.metadata.dependencies.total
-      });
+      expect(processNpm7AuditOutputMock).toHaveBeenCalledTimes(1);
+      expect(processNpm7AuditOutputMock).toHaveBeenCalledWith(
+        auditOutput,
+        'my-dir'
+      );
     });
 
     it('parses line-by-line', async () => {
@@ -304,85 +290,15 @@ describe('audit', () => {
       fixture['npm@7'].split('').forEach(char => stdout.write(char));
       stdout.end();
 
-      const results = await auditRun;
+      await auditRun;
 
       const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
 
-      delete auditOutput.metadata.vulnerabilities;
-
-      expect(results.findings).toMatchInlineSnapshot(`
-        Object {
-          "1179": Object {
-            "id": 1179,
-            "name": "minimist",
-            "paths": Array [
-              "minimist",
-            ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
-            "versions": Array [],
-          },
-        }
-      `);
-      expect(results.dependencyStatistics).toStrictEqual({
-        dependencies: auditOutput.metadata.dependencies.prod,
-        devDependencies: auditOutput.metadata.dependencies.dev,
-        optionalDependencies: auditOutput.metadata.dependencies.optional,
-        totalDependencies: auditOutput.metadata.dependencies.total
-      });
-    });
-
-    describe('when there are multiple vulnerabilities against the same package', () => {
-      it('includes them as separate findings', async () => {
-        const fixture = fixtures['serialize-to-js'];
-        const { stdout } = mockSpawnProperties();
-
-        const auditRun = audit('my-dir', 'npm');
-
-        fixture['npm@7'].split('\n').forEach(line => stdout.write(`${line}\n`));
-        stdout.end();
-
-        const results = await auditRun;
-
-        const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
-
-        expect(results.findings).toMatchInlineSnapshot(`
-          Object {
-            "1429": Object {
-              "id": 1429,
-              "name": "serialize-to-js",
-              "paths": Array [
-                "serialize-to-js",
-              ],
-              "range": "<3.0.1",
-              "severity": "moderate",
-              "title": "Cross-Site Scripting",
-              "url": "https://npmjs.com/advisories/1429",
-              "versions": Array [],
-            },
-            "790": Object {
-              "id": 790,
-              "name": "serialize-to-js",
-              "paths": Array [
-                "serialize-to-js",
-              ],
-              "range": "<2.0.0",
-              "severity": "high",
-              "title": "Denial of Service",
-              "url": "https://npmjs.com/advisories/790",
-              "versions": Array [],
-            },
-          }
-        `);
-        expect(results.dependencyStatistics).toStrictEqual({
-          dependencies: auditOutput.metadata.dependencies.prod,
-          devDependencies: auditOutput.metadata.dependencies.dev,
-          optionalDependencies: auditOutput.metadata.dependencies.optional,
-          totalDependencies: auditOutput.metadata.dependencies.total
-        });
-      });
+      expect(processNpm7AuditOutputMock).toHaveBeenCalledTimes(1);
+      expect(processNpm7AuditOutputMock).toHaveBeenCalledWith(
+        auditOutput,
+        'my-dir'
+      );
     });
 
     describe('when the json is not parsable', () => {

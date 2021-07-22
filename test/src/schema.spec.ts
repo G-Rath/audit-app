@@ -30,10 +30,10 @@ describe('config schema', () => {
   ])('fails "%s"', invalidPath => {
     const invalidPathError: ErrorObject = {
       keyword: 'pattern',
-      dataPath: '/ignore/0',
+      instancePath: '/ignore/0',
       schemaPath: '#/properties/ignore/items/pattern',
       params: { pattern: expect.any(String) as string },
-      message: expect.stringContaining('should match pattern') as string
+      message: expect.stringContaining('must match pattern') as string
     };
 
     expect(validate({ ignore: [invalidPath] })).toStrictEqual([
@@ -74,10 +74,10 @@ describe('config schema', () => {
       [
         {
           keyword: 'enum',
-          dataPath: '/packageManager',
+          instancePath: '/packageManager',
           schemaPath: '#/definitions/SupportedPackageManagerOrAuto/enum',
           params: { allowedValues: ['auto', 'npm', 'yarn', 'pnpm'] },
-          message: 'should be equal to one of the allowed values'
+          message: 'must be equal to one of the allowed values'
         }
       ]
     ]

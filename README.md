@@ -5,18 +5,24 @@ outputting the results in a form that makes it easy to triage advisories, and
 providing support for ignoring advisories to keep your CI passing without having
 to sacrifice security.
 
-# NPM 7 Support
+# NPM 7 workspaces
 
-There is initial support for `npm@7`, but it has meant the audit report output
-has been changed significantly due to the difference in information provided in
-the new version.
+Workspaces (which are new in `npm@7`) should be supported at about the same
+level as `npm audit` itself supports them; standard dependencies should be just
+fine, but there may be edge-cases with `file:` dependencies due to limitations
+in resolving the dependency tree for these types of dependencies which affect
+`npm` itself.
 
-In particular, it's now no longer possible to calculate the full dependency path
-to a vulnerability without making additional calls to `npm`. As such, currently
-the paths used for ignoring vulnerabilities with `npm@7` are made up solely of
-the advisory number followed by the name of the package the advisory is for.
+For `audit-app`, these edge-cases _should_ primarily manifest as some
+vulnerabilities technically being reported twice, which shouldn't prevent using
+`audit-app`.
 
-This may be improved in the future.
+If you have any other issues with workspaces, please let us know!
+
+Also note that if you have a `file:` dependency that has the same name as a
+published `npm` package (e.g. `debug`), `npm` will assume it is that published
+package and so mark it affected by any advisories that may exist for the
+dependencies version.
 
 # Getting Started
 

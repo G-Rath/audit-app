@@ -151,3 +151,24 @@ export interface Npm7AuditMetadata {
   vulnerabilities: SeverityCountsWithTotal;
   dependencies: DependencyCounts;
 }
+
+export interface PackageJson {
+  name?: string;
+  version?: string;
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
+  workspaces?: string[];
+}
+
+export interface NpmLockDependency {
+  version: string;
+  requires?: Record<string, string>;
+  dependencies?: Record<string, NpmLockDependency>;
+}
+
+export interface NpmPackageLock {
+  version: string;
+  dependencies: Record<string, NpmLockDependency>;
+}

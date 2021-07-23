@@ -1,4 +1,21 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.6.0...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.7.0...HEAD) (YYYY-MM-DD)
+
+# [0.7.0](https://github.com/G-Rath/audit-app/compare/v0.6.0...v0.7.0) (2021-07-23)
+
+This version greatly improves NPM 7 support, including restoring dependency
+paths used for ignoring vulnerabilities to their full selves as they are with
+`yarn` and NPM 6.
+
+This also means workspaces (which are new in NPM 7) and `file:` dependencies are
+supported properly - there are a few quirks, but these exist in NPM as well and
+are a nature of using local file dependencies so cannot be easily avoided.
+
+All vulnerabilities should be reported, but nested `file:` dependencies may be
+listed both as nested & again as top-level dependencies.
+
+### Features
+
+- improve npm v7 support by walking the dependency tree ([b7694d8e][])
 
 # [0.6.0](https://github.com/G-Rath/audit-app/compare/v0.5.3...v0.6.0) (2021-07-16)
 

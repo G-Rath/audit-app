@@ -31,18 +31,24 @@ describe('processNpm7AuditResults', () => {
     const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
     const results = await processNpm7AuditOutput(auditOutput, pathToFixture);
 
-    expect(results.findings).toStrictEqual({
-      1179: {
-        id: 1179,
-        name: 'minimist',
-        paths: ['mkdirp>minimist'],
-        versions: ['0.0.8'],
-        range: '<0.2.1 || >=1.0.0 <1.2.3',
-        severity: 'low',
-        title: 'Prototype Pollution',
-        url: 'https://npmjs.com/advisories/1179'
+    expect(results.findings).toMatchInlineSnapshot(`
+      Object {
+        "1066649": Object {
+          "id": 1066649,
+          "name": "minimist",
+          "paths": Array [
+            "mkdirp>minimist",
+          ],
+          "range": "<0.2.1",
+          "severity": "moderate",
+          "title": "Prototype Pollution in minimist",
+          "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+          "versions": Array [
+            "0.0.8",
+          ],
+        },
       }
-    });
+    `);
     expect(results.dependencyStatistics).toStrictEqual({
       dependencies: auditOutput.metadata.dependencies.prod,
       devDependencies: auditOutput.metadata.dependencies.dev,
@@ -58,18 +64,26 @@ describe('processNpm7AuditResults', () => {
     const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
     const results = await processNpm7AuditOutput(auditOutput, pathToFixture);
 
-    expect(results.findings).toStrictEqual({
-      1179: {
-        id: 1179,
-        name: 'minimist',
-        paths: ['mkdirp>minimist', 'minimist'],
-        versions: ['0.0.8', '0.0.8'],
-        range: '<0.2.1 || >=1.0.0 <1.2.3',
-        severity: 'low',
-        title: 'Prototype Pollution',
-        url: 'https://npmjs.com/advisories/1179'
+    expect(results.findings).toMatchInlineSnapshot(`
+      Object {
+        "1066649": Object {
+          "id": 1066649,
+          "name": "minimist",
+          "paths": Array [
+            "mkdirp>minimist",
+            "minimist",
+          ],
+          "range": "<0.2.1",
+          "severity": "moderate",
+          "title": "Prototype Pollution in minimist",
+          "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
+          "versions": Array [
+            "0.0.8",
+            "0.0.8",
+          ],
+        },
       }
-    });
+    `);
     expect(results.dependencyStatistics).toStrictEqual({
       dependencies: auditOutput.metadata.dependencies.prod,
       devDependencies: auditOutput.metadata.dependencies.dev,
@@ -86,28 +100,38 @@ describe('processNpm7AuditResults', () => {
       const auditOutput = JSON.parse(fixture['npm@7']) as ParsedNpm7Fixture;
       const results = await processNpm7AuditOutput(auditOutput, pathToFixture);
 
-      expect(results.findings).toStrictEqual({
-        1429: {
-          id: 1429,
-          name: 'serialize-to-js',
-          paths: ['serialize-to-js'],
-          versions: ['1.0.0'],
-          range: '<3.0.1',
-          severity: 'moderate',
-          title: 'Cross-Site Scripting',
-          url: 'https://npmjs.com/advisories/1429'
-        },
-        790: {
-          id: 790,
-          name: 'serialize-to-js',
-          paths: ['serialize-to-js'],
-          versions: ['1.0.0'],
-          range: '<2.0.0',
-          severity: 'high',
-          title: 'Denial of Service',
-          url: 'https://npmjs.com/advisories/790'
+      expect(results.findings).toMatchInlineSnapshot(`
+        Object {
+          "1066118": Object {
+            "id": 1066118,
+            "name": "serialize-to-js",
+            "paths": Array [
+              "serialize-to-js",
+            ],
+            "range": "<2.0.0",
+            "severity": "high",
+            "title": "Denial of Service in serialize-to-js",
+            "url": "https://github.com/advisories/GHSA-w5q7-3pr9-x44w",
+            "versions": Array [
+              "1.0.0",
+            ],
+          },
+          "1066700": Object {
+            "id": 1066700,
+            "name": "serialize-to-js",
+            "paths": Array [
+              "serialize-to-js",
+            ],
+            "range": "<3.0.1",
+            "severity": "moderate",
+            "title": "Cross-Site Scripting in serialize-to-js",
+            "url": "https://github.com/advisories/GHSA-3fjq-93xj-3f3f",
+            "versions": Array [
+              "1.0.0",
+            ],
+          },
         }
-      });
+      `);
 
       expect(results.dependencyStatistics).toStrictEqual({
         dependencies: auditOutput.metadata.dependencies.prod,

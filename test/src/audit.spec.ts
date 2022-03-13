@@ -95,16 +95,16 @@ describe('audit', () => {
 
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
-          "1179": Object {
-            "id": 1179,
+          "1066649": Object {
+            "id": 1066649,
             "name": "minimist",
             "paths": Array [
               "mkdirp>minimist",
             ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
+            "range": "<0.2.1",
+            "severity": "moderate",
+            "title": "Prototype Pollution in minimist",
+            "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
             "versions": Array [
               "0.0.8",
             ],
@@ -131,17 +131,17 @@ describe('audit', () => {
 
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
-          "1179": Object {
-            "id": 1179,
+          "1066649": Object {
+            "id": 1066649,
             "name": "minimist",
             "paths": Array [
-              "mkdirp>minimist",
               "minimist",
+              "mkdirp>minimist",
             ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
+            "range": "<0.2.1",
+            "severity": "moderate",
+            "title": "Prototype Pollution in minimist",
+            "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
             "versions": Array [
               "0.0.8",
             ],
@@ -186,30 +186,30 @@ describe('audit', () => {
 
         expect(results.findings).toMatchInlineSnapshot(`
           Object {
-            "1429": Object {
-              "id": 1429,
-              "name": "serialize-to-js",
-              "paths": Array [
-                "serialize-to-js",
-              ],
-              "range": "<3.0.1",
-              "severity": "moderate",
-              "title": "Cross-Site Scripting",
-              "url": "https://npmjs.com/advisories/1429",
-              "versions": Array [
-                "1.0.0",
-              ],
-            },
-            "790": Object {
-              "id": 790,
+            "1066118": Object {
+              "id": 1066118,
               "name": "serialize-to-js",
               "paths": Array [
                 "serialize-to-js",
               ],
               "range": "<2.0.0",
               "severity": "high",
-              "title": "Denial of Service",
-              "url": "https://npmjs.com/advisories/790",
+              "title": "Denial of Service in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-w5q7-3pr9-x44w",
+              "versions": Array [
+                "1.0.0",
+              ],
+            },
+            "1066700": Object {
+              "id": 1066700,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-3fjq-93xj-3f3f",
               "versions": Array [
                 "1.0.0",
               ],
@@ -382,16 +382,16 @@ describe('audit', () => {
 
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
-          "1179": Object {
-            "id": 1179,
+          "1066649": Object {
+            "id": 1066649,
             "name": "minimist",
             "paths": Array [
               ".>mkdirp>minimist",
             ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
+            "range": "<0.2.1",
+            "severity": "moderate",
+            "title": "Prototype Pollution in minimist",
+            "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
             "versions": Array [
               "0.0.8",
             ],
@@ -418,16 +418,16 @@ describe('audit', () => {
 
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
-          "1179": Object {
-            "id": 1179,
+          "1066649": Object {
+            "id": 1066649,
             "name": "minimist",
             "paths": Array [
               ".>minimist",
             ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
+            "range": "<0.2.1",
+            "severity": "moderate",
+            "title": "Prototype Pollution in minimist",
+            "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
             "versions": Array [
               "0.0.8",
             ],
@@ -455,30 +455,30 @@ describe('audit', () => {
 
         expect(results.findings).toMatchInlineSnapshot(`
           Object {
-            "1429": Object {
-              "id": 1429,
-              "name": "serialize-to-js",
-              "paths": Array [
-                ".>serialize-to-js",
-              ],
-              "range": "<3.0.1",
-              "severity": "moderate",
-              "title": "Cross-Site Scripting",
-              "url": "https://npmjs.com/advisories/1429",
-              "versions": Array [
-                "1.0.0",
-              ],
-            },
-            "790": Object {
-              "id": 790,
+            "1066118": Object {
+              "id": 1066118,
               "name": "serialize-to-js",
               "paths": Array [
                 ".>serialize-to-js",
               ],
               "range": "<2.0.0",
               "severity": "high",
-              "title": "Denial of Service",
-              "url": "https://npmjs.com/advisories/790",
+              "title": "Denial of Service in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-w5q7-3pr9-x44w",
+              "versions": Array [
+                "1.0.0",
+              ],
+            },
+            "1066700": Object {
+              "id": 1066700,
+              "name": "serialize-to-js",
+              "paths": Array [
+                ".>serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-3fjq-93xj-3f3f",
               "versions": Array [
                 "1.0.0",
               ],
@@ -551,16 +551,16 @@ describe('audit', () => {
 
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
-          "1179": Object {
-            "id": 1179,
+          "1066649": Object {
+            "id": 1066649,
             "name": "minimist",
             "paths": Array [
               "mkdirp>minimist",
             ],
-            "range": "<0.2.1 || >=1.0.0 <1.2.3",
-            "severity": "low",
-            "title": "Prototype Pollution",
-            "url": "https://npmjs.com/advisories/1179",
+            "range": "<0.2.1",
+            "severity": "moderate",
+            "title": "Prototype Pollution in minimist",
+            "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
             "versions": Array [
               "0.0.8",
             ],
@@ -591,17 +591,17 @@ describe('audit', () => {
 
         expect(results.findings).toMatchInlineSnapshot(`
           Object {
-            "1179": Object {
-              "id": 1179,
+            "1066649": Object {
+              "id": 1066649,
               "name": "minimist",
               "paths": Array [
-                "mkdirp>minimist",
                 "minimist",
+                "mkdirp>minimist",
               ],
-              "range": "<0.2.1 || >=1.0.0 <1.2.3",
-              "severity": "low",
-              "title": "Prototype Pollution",
-              "url": "https://npmjs.com/advisories/1179",
+              "range": "<0.2.1",
+              "severity": "moderate",
+              "title": "Prototype Pollution in minimist",
+              "url": "https://github.com/advisories/GHSA-vh95-rmgr-6w4m",
               "versions": Array [
                 "0.0.8",
               ],
@@ -633,30 +633,30 @@ describe('audit', () => {
 
         expect(results.findings).toMatchInlineSnapshot(`
           Object {
-            "1429": Object {
-              "id": 1429,
-              "name": "serialize-to-js",
-              "paths": Array [
-                "serialize-to-js",
-              ],
-              "range": "<3.0.1",
-              "severity": "moderate",
-              "title": "Cross-Site Scripting",
-              "url": "https://npmjs.com/advisories/1429",
-              "versions": Array [
-                "1.0.0",
-              ],
-            },
-            "790": Object {
-              "id": 790,
+            "1066118": Object {
+              "id": 1066118,
               "name": "serialize-to-js",
               "paths": Array [
                 "serialize-to-js",
               ],
               "range": "<2.0.0",
               "severity": "high",
-              "title": "Denial of Service",
-              "url": "https://npmjs.com/advisories/790",
+              "title": "Denial of Service in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-w5q7-3pr9-x44w",
+              "versions": Array [
+                "1.0.0",
+              ],
+            },
+            "1066700": Object {
+              "id": 1066700,
+              "name": "serialize-to-js",
+              "paths": Array [
+                "serialize-to-js",
+              ],
+              "range": "<3.0.1",
+              "severity": "moderate",
+              "title": "Cross-Site Scripting in serialize-to-js",
+              "url": "https://github.com/advisories/GHSA-3fjq-93xj-3f3f",
               "versions": Array [
                 "1.0.0",
               ],

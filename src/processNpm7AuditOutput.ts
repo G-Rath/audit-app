@@ -24,6 +24,16 @@ const extractDependencyStatistics = (
   totalDependencies: metadata.dependencies.total
 });
 
+const parseGithubAdvisoryId = (url: string): string => {
+  if (url.startsWith('https://github.com/advisories/GHSA-')) {
+    return url.substring(url.indexOf('GHSA-'));
+  }
+
+  console.warn('could not find GitHub advisory ID');
+
+  return '';
+};
+
 /**
  * Builds a `finding` from an `npm` v7 `advisory`
  */
@@ -33,6 +43,7 @@ const buildFinding = (
   versions: string[]
 ): Finding => ({
   id: advisory.source,
+  ghAdvisoryId: parseGithubAdvisoryId(advisory.url),
   name: advisory.name,
   paths,
   versions,

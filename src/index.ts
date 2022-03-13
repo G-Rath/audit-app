@@ -4,6 +4,7 @@ import { generateReport } from './generateReport';
 
 export interface Options {
   packageManager: SupportedPackageManager;
+  useGithubAdvisoryId: boolean;
   directory: string;
   debug: boolean;
   ignore: string[];

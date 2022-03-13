@@ -70,6 +70,14 @@ with no comments, trailing commas, or single-quotes:
 
 You can disable loading from a config file using `--no-config.`
 
+### `--update-config-ignores`
+
+Default: false
+
+If provided, `audit-app` will attempt to update the config file pointed to by
+`--config` to contain an `ignore` property made up of the vulnerabilities found
+during the audit.
+
 ## `--package-manager`, `-p`
 
 Default: `auto`  
@@ -281,6 +289,9 @@ track and update the list of ignored vulnerabilities:
   ]
 }
 ```
+
+You can have `audit-app` attempt to update the config for you with the
+`--update-config-ignores` flag.
 
 ## How it works
 

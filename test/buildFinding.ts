@@ -2,6 +2,7 @@ import { Finding } from '../src/types';
 
 export const buildFinding = (finding: Partial<Finding>): Finding => ({
   id: 1500,
+  ghAdvisoryId: 'GHSA-p9pc-299p-vxgp',
   name: 'yargs-parser',
   paths: [`${finding.id ?? 1500}|${finding.name ?? 'yargs-parser'}`],
   versions: ['9.0.2', '10.1.0'],

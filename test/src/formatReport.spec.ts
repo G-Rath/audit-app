@@ -190,7 +190,7 @@ describe('formatReport', () => {
           expect(prettifyTables(tables)).toMatchInlineSnapshot(`
             "
             ┌──────────────────┬──────────────────────────────────────────────────────────────┐
-            │ low              │ My Second Advisory (#1234)                                   │
+            │ low              │ My Second Advisory (GHSA-p9pc-299p-vxgp)                     │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
             │ Package          │ yargs-parser v9.0.2, v10.1.0                                 │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
@@ -220,7 +220,7 @@ describe('formatReport', () => {
             ┌──────────────────┬──────────────────────────────────────────────────────────────┐
             │ low              │ The advisory with a very                                     │
             │                  │ looooooooooooooooooooooooooooooooooooooooooooooooooooooong   │
-            │                  │ name (#1234)                                                 │
+            │                  │ name (GHSA-p9pc-299p-vxgp)                                   │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
             │ Package          │ yargs-parser v9.0.2, v10.1.0                                 │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
@@ -251,7 +251,8 @@ describe('formatReport', () => {
             ┌──────────────────┬──────────────────────────────────────────────────────────────┐
             │ low              │ The advisory with a very                                     │
             │                  │ looooooooooooooooooooooooooooooooooooooooooooooooooooooooooo │
-            │                  │ ooooooooooooooooooooooooooooooooooooooooong name (#1234)     │
+            │                  │ ooooooooooooooooooooooooooooooooooooooooong name             │
+            │                  │ (GHSA-p9pc-299p-vxgp)                                        │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
             │ Package          │ yargs-parser v9.0.2, v10.1.0                                 │
             ├──────────────────┼──────────────────────────────────────────────────────────────┤
@@ -350,9 +351,9 @@ describe('formatReport', () => {
           ).toMatchInlineSnapshot(`
             "
             ┌────────────┬────────────────────────────────────────────────────────────────────┐
-            │ critical         │ My Advisory (#2)                                             │
-            │ high             │ My Advisory (#1)                                             │
-            │ low              │ My Advisory (#3)                                             │
+            │ critical         │ My Advisory (GHSA-p9pc-299p-vxgp)                            │
+            │ high             │ My Advisory (GHSA-p9pc-299p-vxgp)                            │
+            │ low              │ My Advisory (GHSA-p9pc-299p-vxgp)                            │
             └────────────┴────────────────────────────────────────────────────────────────────┘
             "
           `);

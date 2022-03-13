@@ -39,11 +39,13 @@ describe('auditApp', () => {
           1500: buildFinding({
             paths: ['one', 'two'],
             id: 1500,
+            ghAdvisoryId: '',
             severity: 'low'
           }),
           1234: buildFinding({
             paths: ['three'],
             id: 1234,
+            ghAdvisoryId: 'GHSA-p9pc-299p-vxgp',
             severity: 'high'
           })
         },
@@ -61,7 +63,7 @@ describe('auditApp', () => {
       it('sets the exit code to 0', async () => {
         await auditApp({
           ...emptyOptions,
-          ignore: ['1500|one', '1500|two', '1234|three']
+          ignore: ['1500|one', '1500|two', 'GHSA-p9pc-299p-vxgp|three']
         });
 
         expect(process.exitCode).toBe(0);

@@ -25,6 +25,7 @@ describe('generateReport', () => {
     1500: buildFinding({
       paths: ['three', 'four', 'five'],
       id: 1500,
+      ghAdvisoryId: '',
       severity: 'low'
     })
   };

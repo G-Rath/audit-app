@@ -32,23 +32,25 @@ const generateStatistics = (
     ignored: { ...severityCountsWithTotal }
   };
 
-  Object.values(results.findings).forEach(({ id, paths, severity }) => {
-    const { length: count } = paths.filter(path =>
-      ignores.includes(`${id}|${path}`)
-    );
+  Object.values(results.findings).forEach(
+    ({ id, ghAdvisoryId, paths, severity }) => {
+      const { length: count } = paths.filter(path =>
+        ignores.includes(`${ghAdvisoryId || id}|${path}`)
+      );
 
-    const vulnerable = paths.length - count;
-    const ignored = count;
+      const vulnerable = paths.length - count;
+      const ignored = count;
 
-    statistics.severities[severity] += ignored + vulnerable;
-    statistics.severities.total += ignored + vulnerable;
+      statistics.severities[severity] += ignored + vulnerable;
+      statistics.severities.total += ignored + vulnerable;
 
-    statistics.vulnerable[severity] += vulnerable;
-    statistics.vulnerable.total += vulnerable;
+      statistics.vulnerable[severity] += vulnerable;
+      statistics.vulnerable.total += vulnerable;
 
-    statistics.ignored[severity] += ignored;
-    statistics.ignored.total += ignored;
-  });
+      statistics.ignored[severity] += ignored;
+      statistics.ignored.total += ignored;
+    }
+  );
 
   return statistics;
 };
@@ -63,8 +65,8 @@ export const generateReport = (
     missing
   ] = Object.values(results.findings)
     .reduce<string[]>(
-      (allPaths, { id, paths }) =>
-        allPaths.concat(paths.map(path => `${id}|${path}`)),
+      (allPaths, { id, ghAdvisoryId, paths }) =>
+        allPaths.concat(paths.map(path => `${ghAdvisoryId || id}|${path}`)),
       []
     )
     .reduce<[string[], string[], string[]]>(

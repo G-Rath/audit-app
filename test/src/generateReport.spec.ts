@@ -19,11 +19,13 @@ describe('generateReport', () => {
     1234: buildFinding({
       paths: ['one', 'two'],
       id: 1234,
+      ghAdvisoryId: 'GHSA-abc1-123a-xyz9',
       severity: 'high'
     }),
     1500: buildFinding({
       paths: ['three', 'four', 'five'],
       id: 1500,
+      ghAdvisoryId: '',
       severity: 'low'
     })
   };
@@ -40,8 +42,8 @@ describe('generateReport', () => {
       statistics: AnyStatistics,
       findings,
       vulnerable: [
-        '1234|one',
-        '1234|two',
+        'GHSA-abc1-123a-xyz9|one',
+        'GHSA-abc1-123a-xyz9|two',
         '1500|three',
         '1500|four',
         '1500|five'
@@ -81,19 +83,25 @@ describe('generateReport', () => {
 
   describe('when there are paths to ignore', () => {
     it('includes them as ignored', () => {
-      const report = generateReport(['1234|one', '1500|five'], results);
+      const report = generateReport(
+        ['GHSA-abc1-123a-xyz9|one', '1500|five'],
+        results
+      );
 
       expect(report).toStrictEqual<AuditReport>({
         statistics: AnyStatistics,
         findings,
-        vulnerable: ['1234|two', '1500|three', '1500|four'],
-        ignored: ['1234|one', '1500|five'],
+        vulnerable: ['GHSA-abc1-123a-xyz9|two', '1500|three', '1500|four'],
+        ignored: ['GHSA-abc1-123a-xyz9|one', '1500|five'],
         missing: []
       });
     });
 
     it('counts them as severities', () => {
-      const { statistics } = generateReport(['1234|one', '1500|five'], results);
+      const { statistics } = generateReport(
+        ['GHSA-abc1-123a-xyz9|one', '1500|five'],
+        results
+      );
 
       expect(statistics.severities).toStrictEqual<SeverityCountsWithTotal>({
         total: 5,
@@ -106,7 +114,10 @@ describe('generateReport', () => {
     });
 
     it('counts them as ignored', () => {
-      const { statistics } = generateReport(['1234|one', '1500|five'], results);
+      const { statistics } = generateReport(
+        ['GHSA-abc1-123a-xyz9|one', '1500|five'],
+        results
+      );
 
       expect(statistics.ignored).toStrictEqual<SeverityCountsWithTotal>({
         total: 2,
@@ -119,7 +130,10 @@ describe('generateReport', () => {
     });
 
     it('does not count them as vulnerable', () => {
-      const { statistics } = generateReport(['1234|one', '1500|five'], results);
+      const { statistics } = generateReport(
+        ['GHSA-abc1-123a-xyz9|one', '1500|five'],
+        results
+      );
 
       expect(statistics.vulnerable).toStrictEqual<SeverityCountsWithTotal>({
         total: 3,
@@ -134,15 +148,15 @@ describe('generateReport', () => {
     describe('when a path to ignore is not found to be vulnerable', () => {
       it('includes them as missing', () => {
         const report = generateReport(
-          ['1234|one', '1500|five', '1500|six'],
+          ['GHSA-abc1-123a-xyz9|one', '1500|five', '1500|six'],
           results
         );
 
         expect(report).toStrictEqual<AuditReport>({
           statistics: AnyStatistics,
           findings,
-          vulnerable: ['1234|two', '1500|three', '1500|four'],
-          ignored: ['1234|one', '1500|five'],
+          vulnerable: ['GHSA-abc1-123a-xyz9|two', '1500|three', '1500|four'],
+          ignored: ['GHSA-abc1-123a-xyz9|one', '1500|five'],
           missing: ['1500|six']
         });
       });

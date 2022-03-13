@@ -73,6 +73,7 @@ const npm6AdvisoryToFinding = (advisory: Npm6Advisory): Finding => ({
     (acc, finding) => acc.concat(finding.paths),
     []
   ),
+  ghAdvisoryId: advisory.github_advisory_id,
   versions: advisory.findings.map(finding => finding.version),
   range: advisory.vulnerable_versions,
   severity: advisory.severity,

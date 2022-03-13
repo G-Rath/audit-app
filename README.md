@@ -118,13 +118,13 @@ Here is an example of the output the `tables` format results in:
 
 ```
 ┌────────────┬────────────────────────────────────────────────────────────────────┐
-│ low        │ Prototype Pollution (#1523)                                        │
+│ low        │ Prototype Pollution (GHSA-p6mc-m468-83gw)                          │
 ├────────────┼────────────────────────────────────────────────────────────────────┤
 │ Package    │ lodash v4.17.15, v3.10.1                                           │
 ├────────────┼────────────────────────────────────────────────────────────────────┤
 │ Patched in │ >=4.17.19                                                          │
 ├────────────┼────────────────────────────────────────────────────────────────────┤
-│ More info  │ https://npmjs.com/advisories/1523                                  │
+│ More info  │ https://github.com/advisories/GHSA-p6mc-m468-83gw                  │
 └────────────┴────────────────────────────────────────────────────────────────────┘
 
 
@@ -192,8 +192,8 @@ audit-app --output paths | findstr '>@commitlint/load>' | clip
 
 Clipboard contents:
 
-> 1523|@commitlint/cli>@commitlint/load>@commitlint/resolve-extends>lodash\
-> 1523|@commitlint/cli>@commitlint/load>lodash
+> GHSA-p6mc-m468-83gw|@commitlint/cli>@commitlint/load>@commitlint/resolve-extends>lodash
+> GHSA-p6mc-m468-83gw|@commitlint/cli>@commitlint/load>lodash
 
 If you're using a json config, you can use `jq` to convert the output into a
 valid JSON array that you can paste straight into your config:
@@ -227,8 +227,8 @@ audit-app --format json | jq '.vulnerable'
 If you wish to select only some vulnerabilities, you can use filters like so:
 
 ```shell script
-audit-app --format json | jq '.vulnerable | map(select(startswith("1556")))'
-audit-app --format json | jq '.vulnerable | map(select(startswith("1556")))'
+audit-app --format json | jq '.vulnerable | map(select(startswith("GHSA-w7rc-rwvf-8q5r")))'
+audit-app --format json | jq '.vulnerable | map(select(startswith("GHSA-w7rc-rwvf-8q5r")))'
 ```
 
 If you're using Powershell, you can do this without `jq` like so:
@@ -249,19 +249,19 @@ represented by a string made up of the advisory's id, and the path to the
 package on the dependency tree that is affected by the advisory, separated by a
 pipe (`|`); for example:
 
-    1179|mkdirp>minimist
+    GHSA-abc1-123a-xyz9|mkdirp>minimist
 
 You can provide this flag multiple times to ignore multiple vulnerabilities:
 
 ```shell script
 audit-app \
-  --ignore '1213|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop' \
-  --ignore '1213|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop' \
-  --ignore '1213|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop' \
-  --ignore '1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop' \
-  --ignore '1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop' \
-  --ignore '1213|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop' \
-  --ignore '1213|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop'
+  --ignore 'GHSA-ff7x-qrg7-qggm|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop' \
+  --ignore 'GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop'
 ```
 
 However, we recommend using an `.auditapprc.json` file to make it easier to
@@ -271,13 +271,13 @@ track and update the list of ignored vulnerabilities:
 {
   "packageManager": "yarn",
   "ignore": [
-    "1213|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop",
-    "1213|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop",
-    "1213|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop",
-    "1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop",
-    "1213|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop",
-    "1213|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop",
-    "1213|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop"
+    "GHSA-ff7x-qrg7-qggm|@commitlint/cli>@commitlint/lint>@commitlint/parse>conventional-changelog-angular>compare-func>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|@commitlint/config-conventional>conventional-changelog-conventionalcommits>compare-func>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/commit-analyzer>conventional-changelog-angular>compare-func>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-angular>compare-func>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/release-notes-generator>conventional-changelog-writer>compare-func>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/npm>npm>libnpx>update-notifier>configstore>dot-prop",
+    "GHSA-ff7x-qrg7-qggm|semantic-release>@semantic-release/npm>npm>update-notifier>configstore>dot-prop"
   ]
 }
 ```
@@ -327,7 +327,7 @@ multiple times:
 
 ```
 audit-app \
-  --ignore 1179|mkdirp>minimist
+  --ignore GHSA-vh95-rmgr-6w4m|mkdirp>minimist
 ```
 
 There is no support for ignoring an entire advisory, because doing so would mean

@@ -45,6 +45,7 @@ export interface Npm6AuditOutput {
 
 export interface Finding {
   id: number;
+  ghAdvisoryId: string;
   name: string;
   paths: string[];
   versions: string[];
@@ -121,6 +122,7 @@ export interface Npm6Advisory {
   references: string;
   access: string;
   severity: Severity;
+  github_advisory_id: string;
   cwe: string;
   metadata: AdvisoryMetadata;
   url: string;

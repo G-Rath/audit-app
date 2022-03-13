@@ -34,6 +34,7 @@ describe('processNpm7AuditResults', () => {
     expect(results.findings).toMatchInlineSnapshot(`
       Object {
         "1066649": Object {
+          "ghAdvisoryId": "GHSA-vh95-rmgr-6w4m",
           "id": 1066649,
           "name": "minimist",
           "paths": Array [
@@ -67,6 +68,7 @@ describe('processNpm7AuditResults', () => {
     expect(results.findings).toMatchInlineSnapshot(`
       Object {
         "1066649": Object {
+          "ghAdvisoryId": "GHSA-vh95-rmgr-6w4m",
           "id": 1066649,
           "name": "minimist",
           "paths": Array [
@@ -103,6 +105,7 @@ describe('processNpm7AuditResults', () => {
       expect(results.findings).toMatchInlineSnapshot(`
         Object {
           "1066118": Object {
+            "ghAdvisoryId": "GHSA-w5q7-3pr9-x44w",
             "id": 1066118,
             "name": "serialize-to-js",
             "paths": Array [
@@ -117,6 +120,7 @@ describe('processNpm7AuditResults', () => {
             ],
           },
           "1066700": Object {
+            "ghAdvisoryId": "GHSA-3fjq-93xj-3f3f",
             "id": 1066700,
             "name": "serialize-to-js",
             "paths": Array [

@@ -154,11 +154,15 @@ const severityColors: Record<Severity, chalk.ChalkFunction> = {
 
 const Severities = Object.keys(severityColors) as Severity[];
 
+const findingId = (finding: Finding): string => {
+  return finding.ghAdvisoryId || `#${finding.id}`;
+};
+
 const buildFindingsTable = (finding: Finding): string =>
   buildTable([
     [
       severityColors[finding.severity](finding.severity),
-      chalk.whiteBright(`${finding.title} (#${finding.id})`)
+      chalk.whiteBright(`${finding.title} (${findingId(finding)})`)
     ],
     [
       'Package',

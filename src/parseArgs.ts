@@ -65,6 +65,10 @@ const parseWithConfig = (args: string[], configPath?: string): ParsedArgs => {
   const { argv }: ParsedArgvWithConfig = yargs(args)
     .completion('completion', false)
     .options({
+      updateConfigIgnores: {
+        boolean: true,
+        default: false
+      },
       config: {
         alias: 'c',
         string: true,

@@ -18,7 +18,9 @@ const emptyOptions: Options = {
   directory: process.cwd(),
   ignore: [],
   debug: false,
-  output: 'tables'
+  output: 'tables',
+  config: '.auditapprc.json',
+  updateConfigIgnores: false
 };
 
 describe('auditApp', () => {

@@ -1,4 +1,5 @@
 import { SupportedPackageManager, audit } from './audit';
+import { createOrUpdateConfig } from './createOrUpdateConfig';
 import { SupportedReportFormat, formatReport } from './formatReport';
 import { generateReport } from './generateReport';
 
@@ -8,6 +9,8 @@ export interface Options {
   debug: boolean;
   ignore: string[];
   output: SupportedReportFormat;
+  config: string;
+  updateConfigIgnores: boolean;
 }
 
 export const auditApp = async (options: Options): Promise<void> => {
@@ -22,6 +25,14 @@ export const auditApp = async (options: Options): Promise<void> => {
     process.exitCode = (report.vulnerable.length || report.missing.length) && 1;
 
     console.log(formatReport(options.output, report));
+
+    if (options.updateConfigIgnores && options.config) {
+      await createOrUpdateConfig(options.config, report);
+
+      console.warn(
+        `\nHave updated ${options.config} to ignore these vulnerabilities`
+      );
+    }
   } catch (error) {
     process.exitCode = 1;
 

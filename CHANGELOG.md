@@ -1,4 +1,25 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.7.0...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.8.0...HEAD) (YYYY-MM-DD)
+
+# [0.8.0](https://github.com/G-Rath/audit-app/compare/v0.7.0...v0.8.0) (2022-03-14)
+
+This version changes audit findings to use the GHSA as the ID where possible,
+which means existing ignores will be incorrect now - luckily this release also
+adds a `--update-config-ignores` flag which can be used to automatically update
+the `ignore` field in the config with all the vulnerabilities found by the
+auditor!
+
+The reason for this change is that the IDs have not been stable since the NPM
+advisory was merged into the GitHub advisory database, so CIs often fail due to
+ignores being "missing" and "new" vulnerabilities appearing.
+
+This should resolve that, since the GHSA should be stable and present for all
+findings with all package managers.
+
+### Features
+
+- use GHSA as ID to improve stability ([#19][])
+- support updating ignore list in config file with `--update-config-ignores`
+  flag ([#20][])
 
 # [0.7.0](https://github.com/G-Rath/audit-app/compare/v0.6.0...v0.7.0) (2021-07-23)
 
@@ -118,6 +139,8 @@ to be updated.
 
 Initial Release 🎉
 
+[#20]: https://github.com/G-Rath/audit-app/pull/20
+[#19]: https://github.com/G-Rath/audit-app/pull/19
 [#14]: https://github.com/G-Rath/audit-app/pull/14
 [#13]: https://github.com/G-Rath/audit-app/pull/13
 [#11]: https://github.com/G-Rath/audit-app/pull/11

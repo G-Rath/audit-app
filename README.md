@@ -1,5 +1,9 @@
 # audit-app
 
+> While `audit-app` is not officially deprecated, we strongly recommend using
+> [`osv-detector`](https://github.com/G-Rath/osv-detector) instead - it does the
+> exact same thing, only better! (and faster too)
+
 A cli tool for auditing apps & packages using their respective package managers,
 outputting the results in a form that makes it easy to triage advisories, and
 providing support for ignoring advisories to keep your CI passing without having

@@ -2,6 +2,7 @@ import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
 import { formatReport } from '../../src/formatReport';
+import { AuditReport } from '../../src/generateReport';
 import { buildFinding } from '../buildFinding';
 
 jest.mock('../../src/audit');
@@ -97,7 +98,7 @@ describe('auditApp', () => {
 
     expect(mockedFormatReport).toHaveBeenCalledWith<
       Parameters<typeof formatReport>
-    >('paths', expect.any(Object));
+    >('paths', expect.any(Object) as AuditReport);
   });
 
   it('logs the formatted report', async () => {

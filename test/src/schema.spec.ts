@@ -23,10 +23,7 @@ describe('config schema', () => {
     '1|a>',
     '1|a>b>',
     '1|a>>b>>c',
-    '1|abc> asasdf1|df>asdf>',
-    'abc|gulp>vinyl-fs>glob-stream>glob>minimatch',
-    'abc|ember-cli>testem>socket.io>socket.io-parser>debug',
-    'abc|socket.io>socket.io-parser'
+    '1|abc> asasdf1|df>asdf>'
   ])('fails "%s"', invalidPath => {
     const invalidPathError: ErrorObject = {
       keyword: 'pattern',
@@ -61,7 +58,11 @@ describe('config schema', () => {
     '534|socket.io-parser',
     '1523|@commitlint/cli>@commitlint/lint>@commitlint/rules>@commitlint/ensure',
     '1523|@commitlint/cli',
-    '1523|meow>@commitlint/cli'
+    '1523|meow>@commitlint/cli',
+    'GHSA-566m-qj78-rww5|css-loader>cssnano>autoprefixer>postcss',
+    'abc|gulp>vinyl-fs>glob-stream>glob>minimatch',
+    'abc|ember-cli>testem>socket.io>socket.io-parser>debug',
+    'abc|socket.io>socket.io-parser'
   ])('allows "%s"', validPath => {
     expect(validate({ ignore: [validPath] })).toStrictEqual([]);
   });

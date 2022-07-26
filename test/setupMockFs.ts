@@ -26,6 +26,7 @@ jest.mock('fs', () => {
   return (
     ufs
       // .use(jest.requireActual('fs'))
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       .use(createFsFromVolume(vol) as any) as unknown
   );
 });

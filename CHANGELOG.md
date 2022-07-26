@@ -1,4 +1,16 @@
-# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.8.0...HEAD) (YYYY-MM-DD)
+# [Unreleased](https://github.com/G-Rath/audit-app/compare/v0.8.1...HEAD) (YYYY-MM-DD)
+
+# [0.8.1](https://github.com/G-Rath/audit-app/compare/v0.8.0...v0.8.1) (2022-07-27)
+
+This version updates the json schema for config files to allow GHSA IDs.
+
+Note that while `audit-app` is not officially deprecated, we now strongly
+recommend using [`osv-detector`](https://github.com/G-Rath/osv-detector)
+instead - it does the exact same thing, only better! (and faster too)
+
+### Bug fixes
+
+- update schema to allow GHSA IDs ([aa5b6ef0][])
 
 # [0.8.0](https://github.com/G-Rath/audit-app/compare/v0.7.0...v0.8.0) (2022-03-14)
 
@@ -145,6 +157,7 @@ Initial Release 🎉
 [#13]: https://github.com/G-Rath/audit-app/pull/13
 [#11]: https://github.com/G-Rath/audit-app/pull/11
 [#10]: https://github.com/G-Rath/audit-app/pull/10
+[aa5b6ef0]: https://github.com/G-Rath/audit-app/commit/aa5b6ef0
 [191652d8]: https://github.com/G-Rath/audit-app/commit/191652d8
 [70ced7f9]: https://github.com/G-Rath/audit-app/commit/70ced7f9
 [2e10def0]: https://github.com/G-Rath/audit-app/commit/2e10def0

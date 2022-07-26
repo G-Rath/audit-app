@@ -1,4 +1,3 @@
-import { mocked } from 'ts-jest/utils';
 import { Options, auditApp } from '../../src';
 import { audit } from '../../src/audit';
 import { formatReport } from '../../src/formatReport';
@@ -8,8 +7,8 @@ import { buildFinding } from '../buildFinding';
 jest.mock('../../src/audit');
 jest.mock('../../src/formatReport');
 
-const mockedAudit = mocked(audit);
-const mockedFormatReport = mocked(formatReport);
+const mockedAudit = jest.mocked(audit);
+const mockedFormatReport = jest.mocked(formatReport);
 
 let consoleLogSpy: jest.SpiedFunction<typeof console.log>;
 let consoleErrorSpy: jest.SpiedFunction<typeof console.error>;

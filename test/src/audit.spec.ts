@@ -1,6 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
 import { PassThrough, Writable } from 'stream';
-import { mocked } from 'ts-jest/utils';
 import { audit } from '../../src/audit';
 import { processNpm7AuditOutput } from '../../src/processNpm7AuditOutput';
 import {
@@ -24,8 +23,8 @@ type ParsedPnpmFixture = WithOptionalVulnerabilitiesInMetadata<PnpmAuditOutput>;
 jest.mock('child_process');
 jest.mock('../../src/processNpm7AuditOutput');
 
-const spawnMock = mocked(spawn);
-const processNpm7AuditOutputMock = mocked(processNpm7AuditOutput);
+const spawnMock = jest.mocked(spawn);
+const processNpm7AuditOutputMock = jest.mocked(processNpm7AuditOutput);
 
 const mockSpawnProperties = (): { stdout: Writable; stderr: Writable } => {
   const out = {
